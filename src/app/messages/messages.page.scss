@@ -1,0 +1,135 @@
+ion-toolbar {
+  --min-height: 80px;
+  
+  // 确保中间容器占据剩余空间
+  .searchbar-container {
+    flex: 1;
+    margin: 0 8px;
+    min-width: 120px;
+  }
+
+  // 优化搜索框样式
+  ion-searchbar {
+    --padding-start: 8px;
+    --padding-end: 8px;
+    padding: 4px 0;
+    --background: var(--ion-color-light);
+    --border-radius: 8px;
+  }
+
+  //  按钮样式 - 默认（小屏幕）只显示图标
+  ion-buttons {
+    ion-button {
+      min-width: 44px;
+      
+      ion-icon {
+        font-size: 24px;  // 小屏幕默认图标大小
+        margin: 0;
+      }
+      
+      .button-label {
+        display: none;  // 默认隐藏文字
+      }
+    }
+  }
+  // 📱 中等屏幕（平板）- 显示文字，图标适中
+  @media (min-width: 768px) and (max-width: 1023px) {
+    ion-buttons {
+      ion-button {
+        ion-icon {
+          font-size: 34px;  // 图标稍微变大
+          margin: 0;
+        }
+        
+        .button-label {
+          display: none;  // 不显示文字
+        }
+      }
+    }
+  }
+
+  // 💻 大屏幕（桌面）- 图标更大，隐藏文字
+  @media (min-width: 1024px) {
+    ion-buttons {
+      ion-button {
+        min-width: 60px;
+        
+        ion-icon {
+          font-size: 36px;  // 大屏幕图标更大
+          margin: 0;
+        }
+        
+        .button-label {
+          display: none;  // 大屏幕隐藏文字
+        }
+      }
+    }
+  }
+
+  // 🖥️ 超大屏幕 - 图标超大
+  @media (min-width: 1440px) {
+    ion-buttons {
+      ion-button {
+        min-width: 70px;
+        
+        ion-icon {
+          font-size: 42px;  // 超大屏幕图标巨大
+        }
+      }
+    }
+  }
+}
+
+// 空状态样式
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  color: var(--ion-color-medium);
+  
+  ion-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+  }
+  
+  p {
+    font-size: 16px;
+    margin: 0;
+  }
+}
+
+// 消息列表项样式
+ion-item {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --inner-padding-end: 0;
+  cursor: pointer;
+  
+  ion-avatar {
+    width: 48px;
+    height: 48px;
+  }
+  
+  ion-label {
+    h2 {
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+    
+    p {
+      font-size: 14px;
+      color: var(--ion-color-medium);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+  
+  ion-badge {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+}

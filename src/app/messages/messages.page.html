@@ -1,0 +1,59 @@
+<ion-header>
+  <ion-toolbar>
+    <!-- 左侧：一键清扫按钮 -->
+    <ion-buttons slot="start">
+      <ion-button (click)="clearAllMessages()">
+        <ion-icon name="trash-outline"></ion-icon>
+        <span class="button-label">清扫</span>
+      </ion-button>
+    </ion-buttons>
+
+    <!-- 中间：搜索框 -->
+    <div class="searchbar-container">
+      <ion-searchbar 
+        [(ngModel)]="searchTerm" 
+        (ionInput)="filterMessages()"
+        placeholder="搜索消息"
+        animated="true">
+      </ion-searchbar>
+    </div>
+
+    <!-- 右侧：通讯录 + 添加 -->
+    <ion-buttons slot="end">
+      <ion-button (click)="openContacts()">
+        <ion-icon slot="icon-only" name="people-outline"></ion-icon>
+        <span class="button-label">通讯录</span>
+      </ion-button>
+      <ion-button (click)="addNewChat()">
+        <ion-icon slot="icon-only" name="add-outline"></ion-icon>
+        <span class="button-label">添加</span>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- 无消息提示 -->
+  <div *ngIf="filteredMessages.length === 0" class="empty-state">
+    <ion-icon name="chatbubbles-outline" size="large"></ion-icon>
+    <p>暂无消息</p>
+  </div>
+
+  <!-- 消息列表 -->
+  <ion-list *ngIf="filteredMessages.length > 0">
+    <ion-item *ngFor="let message of filteredMessages">
+      <ion-avatar slot="start">
+        <img [src]="message.avatar" alt="avatar">
+      </ion-avatar>
+      <ion-label>
+        <h2>{{ message.name }}</h2>
+        <p>{{ message.lastMessage }}</p>
+      </ion-label>
+      <ion-badge slot="end" *ngIf="message.unread > 0" color="danger">{{ message.unread }}</ion-badge>
+    </ion-item>
+  </ion-list>
+</ion-content>
+
+<ion-card-header>
+      <ion-card-subtitle style="text-align: center;">到底咯！</ion-card-subtitle>
+</ion-card-header>

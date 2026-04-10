@@ -1,0 +1,51 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>相机</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- 显示已拍照片 -->
+  <div *ngIf="capturedPhoto; else cameraView" class="photo-preview-container">
+    <div class="photo-preview">
+      <ion-img [src]="capturedPhoto" class="captured-image"></ion-img>
+    </div>
+    
+    <div class="button-container">
+      <ion-button (click)="resetPhoto()" color="medium" expand="block">
+        <ion-icon slot="start" name="refresh-outline"></ion-icon>
+        重新选择
+      </ion-button>
+      <ion-button (click)="confirmPhoto()" color="primary" expand="block">
+        <ion-icon slot="start" name="checkmark-outline"></ion-icon>
+        使用照片
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- 相机界面（还没拍照时显示） -->
+  <ng-template #cameraView>
+    <div class="camera-placeholder">
+      <ion-icon name="camera-outline" class="camera-icon"></ion-icon>
+      <p>点击下方按钮拍照</p>
+      <p class="hint-text">或点击右下角相册按钮选择照片</p>
+    </div>
+  </ng-template>
+</ion-content>
+
+<!-- 右下角拍照按钮 -->
+<ion-fab vertical="bottom" horizontal="end" slot="fixed">
+  <ion-fab-button color="primary" (click)="takePhoto()">
+    <ion-icon name="camera-outline"></ion-icon>
+  </ion-fab-button>
+</ion-fab>
+
+<!-- 右下角相册按钮（在拍照按钮上方） -->
+<ion-fab vertical="bottom" horizontal="end" slot="fixed" class="gallery-fab">
+  <ion-fab-button color="tertiary" (click)="selectFromGallery()">
+    <ion-icon name="images-outline"></ion-icon>
+  </ion-fab-button>
+</ion-fab>

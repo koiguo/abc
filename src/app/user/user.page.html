@@ -1,0 +1,53 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title class="center-title">我的</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- 用户信息 + 二维码图标 -->
+  <ion-card>
+    <ion-card-content style="display: flex; align-items: center; justify-content: space-between;">
+      <!-- 左侧：头像和用户信息 -->
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <ion-avatar style="width: 64px; height: 64px;">
+          <img src="https://ionicframework.com/docs/img/demos/avatar.svg">
+        </ion-avatar>
+        <div>
+          <h2>果果</h2>
+          <p>guo123123@life.com</p>
+        </div>
+      </div>
+      
+      <!-- 右侧：二维码图标 -->
+      <ion-icon name="qr-code-outline" style="font-size: 32px; cursor: pointer;"></ion-icon>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- 功能按钮 -->
+  <ion-card>
+    <ion-card-content>
+      <div class="grid-4">
+        <div class="icon-item">
+          <ion-icon name="ticket-outline"></ion-icon>
+          <span>优惠券</span>
+        </div>
+        <div class="icon-item">
+          <ion-icon name="bag-check-outline"></ion-icon>
+          <span>订单</span>
+        </div>
+        <div class="icon-item">
+          <ion-icon name="cart-outline"></ion-icon>
+          <span>购物车</span>
+        </div>
+        <div class="icon-item">
+          <ion-icon name="ellipsis-horizontal-outline"></ion-icon>
+          <span>更多</span>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

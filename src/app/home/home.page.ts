@@ -12,7 +12,7 @@ register();
   selector: 'app-home',
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
-    standalone: true,          
+  standalone: true,          
   imports: [CommonModule, FormsModule, IonicModule],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })

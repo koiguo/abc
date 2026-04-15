@@ -8,44 +8,48 @@
 </ion-header>
 
 <ion-content>
-  <!-- 用户信息 + 二维码图标 -->
+  <!-- 用户信息卡片 -->
   <ion-card>
     <ion-card-content style="display: flex; align-items: center; justify-content: space-between;">
-      <!-- 左侧：头像和用户信息 -->
       <div style="display: flex; align-items: center; gap: 16px;">
-        <ion-avatar style="width: 64px; height: 64px;">
-          <img src="https://ionicframework.com/docs/img/demos/avatar.svg">
+        <ion-avatar style="width: 64px; height: 64px;"
+        (click)="checkLogin()">
+          <img [src]="avatar || 'https://ionicframework.com/docs/img/demos/avatar.svg'">
         </ion-avatar>
         <div>
-          <h2>果果</h2>
-          <p>guo123123@life.com</p>
+          <h2>{{ username || '用户' }}</h2>
+          <p>{{ email || '暂无邮箱' }}</p>
+          <p style="font-size: 12px; color: #999;">{{ phone || '未绑定手机' }}</p>
         </div>
       </div>
       
-      <!-- 右侧：二维码图标 -->
-      <ion-icon name="qr-code-outline" style="font-size: 32px; cursor: pointer;"></ion-icon>
+      <ion-icon 
+        name="qr-code-outline" 
+        style="font-size: 32px; cursor: pointer;" 
+        (click)="showQRCode()">
+      </ion-icon>
     </ion-card-content>
   </ion-card>
 
-  <!-- 功能按钮 -->
+  <!-- 功能按钮卡片 -->
   <ion-card>
     <ion-card-content>
       <div class="grid-4">
-        <div class="icon-item">
-          <ion-icon name="ticket-outline"></ion-icon>
-          <span>优惠券</span>
+        <div class="icon-item" (click)="handleFunctionClick(functionButtons[0])">
+          <ion-icon [name]="functionButtons[0]?.icon || 'ticket-outline'"></ion-icon>
+          <span>{{ functionButtons[0]?.name || '优惠券' }}</span>
         </div>
-        <div class="icon-item">
-          <ion-icon name="bag-check-outline"></ion-icon>
-          <span>订单</span>
+        <div class="icon-item" (click)="handleFunctionClick(functionButtons[1])">
+          <ion-icon [name]="functionButtons[1]?.icon || 'bag-check-outline'"></ion-icon>
+          <span>{{ functionButtons[1]?.name || '订单' }}</span>
         </div>
-        <div class="icon-item">
-          <ion-icon name="cart-outline"></ion-icon>
-          <span>购物车</span>
+        <div class="icon-item" (click)="handleFunctionClick(functionButtons[2])">
+          <ion-icon [name]="functionButtons[2]?.icon || 'cart-outline'"></ion-icon>
+          <span>{{ functionButtons[2]?.name || '购物车' }}</span>
         </div>
-        <div class="icon-item">
-          <ion-icon name="ellipsis-horizontal-outline"></ion-icon>
-          <span>更多</span>
+        <div class="icon-item" (click)="handleFunctionClick(functionButtons[3])">
+          <ion-icon [name]="functionButtons[3]?.icon || 'ellipsis-horizontal-outline'"></ion-icon>
+          <span>{{ functionButtons[3]?.name || '更多' }}</span>
         </div>
       </div>
     </ion-card-content>

@@ -6,19 +6,19 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class UserService {
-  private apiUrl = 'http://localhost:8000/api';
+  private apiUrl = 'http://localhost:5000/api';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getUserInfo(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/user-info/`);
+    return this.http.get(`${this.apiUrl}/user-info`);
   }
 
   getFunctions(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/functions/`);
+    return this.http.get(`${this.apiUrl}/getfunctions`);
   }
 
   getQRCode(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/qrcode/`);
+    return this.http.get(`${this.apiUrl}/qrcode`);
   }
 }

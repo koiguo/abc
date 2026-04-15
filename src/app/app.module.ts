@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouteReuseStrategy } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { provideHttpClient } from '@angular/common/http'; //4/9添加
+// import { provideHttpClient } from '@angular/common/http'; //4/9添加
 
 import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 

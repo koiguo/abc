@@ -8,7 +8,7 @@ import { UserPage } from './user.page';
 @NgModule({
   imports: [
     CommonModule,
-    IonicModule,        // ✅ 确保这一行存在
+    IonicModule,      
     RouterModule.forChild([
       { path: '', component: UserPage }
     ])

@@ -1,0 +1,171 @@
+//标题文字
+.center-title {
+  text-align: center;
+  position: absolute;
+  left: 50%;
+  top: 50%;                              // 添加：垂直位置50%
+  transform: translate(-50%, -50%);      // 添加：偏移自身一半，实现完全居中
+  right: 0;
+  pointer-events: none;  // 让标题不干扰按钮点击
+  z-index: 1;
+  white-space: nowrap;
+
+  .title-text {
+      font-weight: 600;
+      font-size: 1.2rem;
+      background-color: #000000;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+  }
+
+  .button-item { //功能按钮
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+  }
+  
+  &:active {
+    transform: scale(0.98);
+  }
+  
+  span {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #334155;
+  }
+  
+  .arrow-icon {
+    font-size: 18px;
+    color: #94a3b8;
+  }
+}
+
+.category-section { //卡片
+  margin: 16px;
+  background: rgb(255, 255, 255);
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+}
+
+.category-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 16px 12px 16px;
+  border-bottom: 1px solid #f0f2f5;
+  
+  ion-icon { //图标
+    font-size: 24px;
+    color: #f58aba;
+  }
+  
+  span { //功能分类示意文字
+    font-weight: 600;
+    font-size: 1.1rem;;
+    color: #000000;
+    letter-spacing: -0.3px;
+  }
+}
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);  /* 固定3列，每列等宽 */
+  padding: 12px 12px 16px 12px;
+  gap: 12px;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #f8fafc;
+  padding: 8px 8px;
+  border-radius: 40px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  min-width: 0;  /* 添加：防止内容溢出 */
+
+  span {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #334155;
+    white-space: nowrap;  /* 添加：文字不换行 */
+    overflow: hidden;     /* 添加：溢出隐藏 */
+    text-overflow: ellipsis;  /* 添加：溢出显示省略号 */
+  }
+  
+  &:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+  }
+  
+    &:active {
+    transform: scale(0.98);
+  }
+
+
+  ion-checkbox {
+    --size: 20px;
+    --border-radius: 6px;
+    --checkbox-background-checked: #667eea;
+    --border-color-checked: #667eea;
+    --checkmark-color: white;
+    margin: 0;
+  }
+  
+  span {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #334155;
+  }
+}
+
+// 自定义Toast样式
+.custom-toast {
+  --background: #1f2937;
+  --color: #ffffff;
+  --border-radius: 12px;
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-weight: 500;
+}
+
+// 响应式适配
+@media (max-width: 375px) {
+  .checkbox-grid {
+    gap: 8px;
+    padding: 8px 12px 12px 12px;
+  }
+  
+  .checkbox-item {
+    padding: 6px 4px;  /* 进一步减小内边距 */
+    gap: 4px;          /* 减小间距 */
+    
+    span {
+      font-size: 0.75rem;  /* 减小字体 */
+    }
+    
+    ion-checkbox {
+      --size: 16px;  /* 减小checkbox大小 */
+    }
+  }
+  
+  .category-section {
+    margin: 12px;
+  }
+}

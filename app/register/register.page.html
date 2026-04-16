@@ -1,0 +1,82 @@
+<ion-content class="register-content">
+  <div class="register-container">
+    <div class="header-section">
+      <ion-button fill="clear" (click)="goToLogin()" class="back-btn">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+      <h1>注册新账号</h1>
+    </div>
+
+    <form (ngSubmit)="register()" class="register-form">
+      <ion-item lines="full" class="form-item">
+        <ion-icon name="person-outline" slot="start"></ion-icon>
+        <ion-input
+          [(ngModel)]="registerData.name"
+          name="name"
+          type="text"
+          placeholder="用户名"
+          required
+        ></ion-input>
+      </ion-item>
+
+      <ion-item lines="full" class="form-item">
+        <ion-icon name="call-outline" slot="start"></ion-icon>
+        <ion-input
+          [(ngModel)]="registerData.phone"
+          name="phone"
+          type="tel"
+          placeholder="手机号"
+          required
+        ></ion-input>
+      </ion-item>
+
+      <ion-item lines="full" class="form-item">
+        <ion-icon name="mail-outline" slot="start"></ion-icon>
+        <ion-input
+          [(ngModel)]="registerData.email"
+          name="email"
+          type="email"
+          placeholder="邮箱（选填）"
+        ></ion-input>
+      </ion-item>
+
+      <ion-item lines="full" class="form-item">
+        <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+        <ion-input
+          [(ngModel)]="registerData.password"
+          name="password"
+          type="password"
+          placeholder="密码（至少6位）"
+          required
+        ></ion-input>
+      </ion-item>
+
+      <ion-item lines="full" class="form-item">
+        <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+        <ion-input
+          [(ngModel)]="confirmPassword"
+          name="confirmPassword"
+          type="password"
+          placeholder="确认密码"
+          required
+        ></ion-input>
+      </ion-item>
+
+      <ion-button
+        expand="block"
+        type="submit"
+        class="register-btn"
+        shape="round"
+      >
+        注册
+      </ion-button>
+
+      <div class="login-link">
+        <span>已有账号？</span>
+        <ion-button fill="clear" (click)="goToLogin()" class="login-btn">
+          去登录
+        </ion-button>
+      </div>
+    </form>
+  </div>
+</ion-content>

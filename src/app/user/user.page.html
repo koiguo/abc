@@ -4,8 +4,16 @@
       <ion-back-button></ion-back-button>
     </ion-buttons>
     <ion-title class="center-title">我的</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openSettings()">
+        <ion-icon slot="icon-only" name="settings-outline"></ion-icon>
+          <span class="button-label">设置</span>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
+
+
 
 <ion-content>
   <!-- 用户信息卡片 -->

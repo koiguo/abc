@@ -1,33 +1,30 @@
 <ion-app>
-  <!-- 底部导航栏 -->
-  <ion-tabs>
+  <ion-router-outlet></ion-router-outlet>
+  
+  <!-- 底部导航栏：只在登录成功后显示 -->
+  <ion-tabs *ngIf="showTabs">
     <ion-tab-bar slot="bottom">
-      <!-- 主页按钮 -->
-      <ion-tab-button tab="home">
+      <ion-tab-button (click)="goToHome()">
         <ion-icon name="home-outline"></ion-icon>
         <ion-label>主页</ion-label>
       </ion-tab-button>
       
-      <!-- 分类按钮 -->
-      <ion-tab-button tab="category">
+      <ion-tab-button (click)="goToCategory()">
         <ion-icon name="apps-outline"></ion-icon>
         <ion-label>分类</ion-label>
       </ion-tab-button>
       
-      <!-- 拍照按钮 -->
       <ion-tab-button (click)="openCamera()">
         <ion-icon name="camera-outline"></ion-icon>
         <ion-label>拍照</ion-label>
       </ion-tab-button>
       
-      <!-- 信息按钮 -->
-      <ion-tab-button tab="messages">
+      <ion-tab-button (click)="goToMessages()">
         <ion-icon name="chatbubbles-outline"></ion-icon>
         <ion-label>信息</ion-label>
       </ion-tab-button>
       
-      <!-- 用户按钮 -->
-      <ion-tab-button tab="user">
+      <ion-tab-button (click)="goToUser()">
         <ion-icon name="person-outline"></ion-icon>
         <ion-label>我的</ion-label>
       </ion-tab-button>

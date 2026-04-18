@@ -9,7 +9,7 @@ import { addIcons } from 'ionicons';
 import { 
   mailOutline, chevronForwardOutline,trendingUpOutline,cartOutline,arrowBackOutline,searchOutline,settingsOutline,
   locationOutline,heartOutline,cameraOutline,trashOutline,addOutline,peopleOutline,ticketOutline,bagCheckOutline,ellipsisHorizontalOutline,
-  qrCodeOutline,personCircleOutline,lockClosedOutline,callOutline
+  qrCodeOutline,personCircleOutline,lockClosedOutline,callOutline,arrowDownOutline
 } from 'ionicons/icons';
 
 
@@ -42,6 +42,7 @@ addIcons({
   'person-circle-outline':personCircleOutline,
   'lock-closed-outline':lockClosedOutline,
   'call-outline':callOutline,
+  'arrow-down-outline':arrowDownOutline,
 })
 
 bootstrapApplication(AppComponent, {

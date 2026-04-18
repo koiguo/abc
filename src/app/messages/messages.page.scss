@@ -1,21 +1,30 @@
-ion-toolbar {
-  --min-height: 80px;
-  
-  // 确保中间容器占据剩余空间
-  .searchbar-container {
-    flex: 1;
-    margin: 0 8px;
-    min-width: 120px;
-  }
+// 标题居中
+.center-title {
+  text-align: center;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  font-weight: 500;
+  font-size: 18px;
+}
 
-  // 优化搜索框样式
+.search-toolbar {
+  --background: var(--ion-color-light);
+  padding: 0px 16px;
+  min-height: 44px;
+  
   ion-searchbar {
-    --padding-start: 8px;
-    --padding-end: 8px;
-    padding: 4px 0;
-    --background: var(--ion-color-light);
+    padding: 0;
+    --box-shadow: none;
     --border-radius: 8px;
   }
+}
 
   //  按钮样式 - 默认（小屏幕）只显示图标
   ion-buttons {
@@ -78,7 +87,6 @@ ion-toolbar {
       }
     }
   }
-}
 
 // 空状态样式
 .empty-state {
@@ -86,7 +94,7 @@ ion-toolbar {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 60vh;
+  padding: 60px 20px;
   color: var(--ion-color-medium);
   
   ion-icon {
@@ -99,13 +107,19 @@ ion-toolbar {
     margin: 0;
   }
 }
+// 底部提示
+.end-tip {
+  text-align: center;
+  padding: 20px;
+  margin-top: 10px;
+}
 
 // 消息列表项样式
 ion-item {
-  --padding-start: 16px;
-  --padding-end: 16px;
-  --inner-padding-end: 0;
-  cursor: pointer;
+  --padding-start: 8px;
+  --padding-end: 8px;
+  --inner-padding-end:8px;
+
   
   ion-avatar {
     width: 48px;
@@ -114,13 +128,13 @@ ion-item {
   
   ion-label {
     h2 {
-      font-weight: 600;
-      font-size: 16px;
+      font-size: 12px;
+      font-weight: 500;
       margin-bottom: 4px;
     }
     
     p {
-      font-size: 14px;
+      font-size: 13px;
       color: var(--ion-color-medium);
       overflow: hidden;
       text-overflow: ellipsis;

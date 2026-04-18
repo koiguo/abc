@@ -29,15 +29,15 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/login`, { account, password })
       .pipe(
         tap((response: any) => {
-          if (response && response.success) {
             console.log('登录响应数据:', response);
+            if (response && response.success) {
             const userData = {
-              id: response.data?.user?.id || response.data?.id,
-              name: response.data?.user?.name || response.data?.name,
-              phone: response.data?.user?.phone || response.data?.phone,
-              email: response.data?.user?.email || response.data?.email || ''
-            };
-            console.log('保存的用户信息:', userData);
+              id: response.data.user.id,
+            name: response.data.user.name,      // 注意字段名
+            phone: response.data.user.phone,
+            email: response.data.user.email || ''
+          };
+           console.log('AuthService - 保存到 localStorage:', userData);  // 添加日志
             localStorage.setItem('user', JSON.stringify(userData));
             this.isLoggedInSubject.next(true);
           }

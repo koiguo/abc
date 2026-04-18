@@ -27,7 +27,16 @@ export class MessagesPage implements OnInit {
       { id: 3, name: '产品群', lastMessage: '晚上我们有优惠活动哦', unread: 15, avatar: 'https://ionicframework.com/docs/img/demos/avatar.svg' }
     ];
     this.filteredMessages = [...this.messages];
+    // 初始化时保存未读消息数量
+    this.saveUnreadCount();
   }
+
+  // 计算并保存未读消息数量
+  saveUnreadCount() {
+    const totalUnread = this.messages.reduce((total, msg) => total + msg.unread, 0);
+    localStorage.setItem('unreadCount', totalUnread.toString());
+  }
+  
 
   // 搜索过滤逻辑
   filterMessages() {
@@ -47,6 +56,12 @@ export class MessagesPage implements OnInit {
     // 模拟后端清理：将所有消息的 unread 置为 0
     this.messages.forEach(msg => msg.unread = 0);
     this.filterMessages(); // 刷新列表显示
+
+    // 保存未读数量为 0 到 localStorage
+    localStorage.setItem('unreadCount', '0');
+    
+    // 可选：触发一个自定义事件通知首页
+    window.dispatchEvent(new CustomEvent('messagesCleared'));
     
     const toast = await this.toastController.create({
       message: '所有未读消息已清扫',

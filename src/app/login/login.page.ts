@@ -52,6 +52,7 @@ export class LoginPage {
           await loading.dismiss();
           
           if (response.success) {
+            console.log('登录成功，保存的用户信息:', response.data.user);
             this.showToast('登录成功！', 'success');
             // 跳转到用户主页
             this.router.navigate(['/home']);

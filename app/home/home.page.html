@@ -12,7 +12,8 @@
       placeholder="搜索商品、服务或商家..." 
       [(ngModel)]="searchText"
       (ionInput)="onSearch()"
-      animated>
+      animated
+      style="--min-height: 40px;">
     </ion-searchbar>
 
     <!-- 右侧：消息通知 + 用户头像 -->
@@ -34,7 +35,7 @@
 
 
 <!-- 可滚动内容 -->
-<ion-content [fullscreen]="true">
+<ion-content class="home-page">
   
   <!-- 图片轮播图 -->
     <!-- 轮播外层 -->

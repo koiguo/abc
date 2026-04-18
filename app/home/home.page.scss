@@ -1,14 +1,3 @@
-// 标题居中
-.center-title {
-  text-align: center;
-  font-weight: 500;
-  font-size: 18px;
-}
-
-// 相对定位
-.relative-pos {
-  position: relative;
-
 // 消息红点
   .red-dot {
     position: absolute;
@@ -20,26 +9,6 @@
     border-radius: 50%;
     display: block;
   }
-}
-
-.clickable {
-  cursor: pointer;
-}
-
-// 搜索框所在行布局
-ion-toolbar {
-  --min-height: 51px;
-  
-  ion-searchbar {
-    flex: 1;
-    --border-radius: 8px;
-    --box-shadow: none;
-  }
-  
-  ion-buttons {
-    margin-left: 8px;
-  }
-}
 
 // 轮播图
 .my-swiper {
@@ -138,14 +107,16 @@ swiper-slide img {
 }
 
 // 卡片样式
-ion-card {
-  margin: 12px;
-  border-radius: 16px;
-}
+.home-page {
+  ion-card {
+    margin: 12px;
+    border-radius: 16px;
+  }
 
-ion-card-title {
-  font-size: 18px;
-  font-weight: 600;
+  ion-card-title {
+    font-size: 18px;
+    font-weight: 600;
+  }
 }
 
 .custom-spinner {
@@ -160,6 +131,7 @@ ion-card-title {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
 // 底部提示样式
 .bottom-tip {
   text-align: center;

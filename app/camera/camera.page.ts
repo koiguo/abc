@@ -41,7 +41,7 @@ import { ToastController } from '@ionic/angular';
 })
 export class CameraPage implements OnInit {
 
-    // 存储拍好的照片
+  // 存储拍好的照片
   capturedPhoto: string | null = null;  
 
   constructor(

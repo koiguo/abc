@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router, NavigationEnd } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { homeOutline, appsOutline, cameraOutline, chatbubblesOutline, personOutline } from 'ionicons/icons';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Capacitor } from '@capacitor/core';
-import { Router } from '@angular/router';
 import { ToastController, AlertController, ActionSheetController } from '@ionic/angular';
 
 @Component({
@@ -13,11 +13,13 @@ import { ToastController, AlertController, ActionSheetController } from '@ionic/
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
   standalone: true,
-  imports: [IonicModule, RouterModule]
+  imports: [IonicModule, RouterModule, CommonModule]
 })
 
 export class AppComponent {
-  
+  // 控制底部导航栏的显示/隐藏
+  showTabs = false;
+
   constructor(
     private router: Router,
     private toastController: ToastController,
@@ -32,9 +34,36 @@ export class AppComponent {
       'chatbubbles-outline': chatbubblesOutline,
       'person-outline': personOutline
     });
+
+    // 监听路由变化，控制导航栏显示/隐藏
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        const currentUrl = event.urlAfterRedirects;
+        // 在登录页和注册页隐藏导航栏，其他页面显示
+        this.showTabs = !(currentUrl.includes('/login') || currentUrl.includes('/register'));
+        console.log('当前路由:', currentUrl, '显示导航栏:', this.showTabs);
+      }
+    });
   }
 
-  // 打开相机或相册选择
+  // ========== 页面跳转方法 ==========
+  goToHome() {
+    this.router.navigate(['/home']);
+  }
+
+  goToCategory() {
+    this.router.navigate(['/category']);
+  }
+
+  goToMessages() {
+    this.router.navigate(['/messages']);
+  }
+
+  goToUser() {
+    this.router.navigate(['/user']);
+  }
+
+  // ========== 相机功能（你原有的代码，保持不变）==========
   async openCamera() {
     // 移动端使用 Capacitor
     if (Capacitor.isNativePlatform()) {
@@ -77,7 +106,6 @@ export class AppComponent {
   // 从相机拍照
   private async takePhotoFromCamera() {
     try {
-      // 检查权限
       const permission = await Camera.checkPermissions();
       if (permission.camera !== 'granted') {
         const result = await Camera.requestPermissions();
@@ -87,20 +115,16 @@ export class AppComponent {
         }
       }
 
-      // 拍照
       const photo = await Camera.getPhoto({
         quality: 90,
-        allowEditing: true,      // 允许编辑/裁剪
+        allowEditing: true,
         resultType: CameraResultType.DataUrl,
         source: CameraSource.Camera,
-        saveToGallery: true      // 保存到系统相册
+        saveToGallery: true
       });
 
-      // 拍照成功
       if (photo.dataUrl) {
         await this.showToast('拍照成功！', 'success');
-        
-        // 跳转到预览页面显示照片
         this.router.navigate(['/camera'], {
           state: { photo: photo.dataUrl, source: 'camera' }
         });
@@ -117,7 +141,6 @@ export class AppComponent {
   // 从相册选择
   private async selectFromGallery() {
     try {
-      // 检查权限
       const permission = await Camera.checkPermissions();
       if (permission.photos !== 'granted') {
         const result = await Camera.requestPermissions();
@@ -127,19 +150,15 @@ export class AppComponent {
         }
       }
 
-      // 从相册选择照片
       const photo = await Camera.getPhoto({
         quality: 90,
-        allowEditing: true,      // 允许编辑/裁剪
+        allowEditing: true,
         resultType: CameraResultType.DataUrl,
-        source: CameraSource.Photos  // 从相册选择
+        source: CameraSource.Photos
       });
 
-      // 选择成功
       if (photo.dataUrl) {
         await this.showToast('照片已选择！', 'success');
-        
-        // 跳转到预览页面显示照片
         this.router.navigate(['/camera'], {
           state: { photo: photo.dataUrl, source: 'gallery' }
         });
@@ -156,11 +175,10 @@ export class AppComponent {
   // PC端拍照（浏览器）
   private async takePhotoWeb() {
     try {
-      // 创建文件选择器
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = 'image/*';
-      input.capture = 'environment'; // 直接打开相机
+      input.capture = 'environment';
       
       input.onchange = async (event: any) => {
         const file = event.target.files[0];

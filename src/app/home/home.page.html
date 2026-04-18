@@ -1,39 +1,41 @@
 <!-- 顶部栏 -->
 <ion-header>
+  <!-- 第一行：标题 -->
   <ion-toolbar>
     <ion-title class="center-title">testV1.0</ion-title>
+  </ion-toolbar>
+
+  <!-- 第二行：搜索框 + 右侧图标 -->
+  <ion-toolbar>
+  <!-- 搜索框 + 添加图片搜索按键 -->
+    <ion-searchbar 
+      placeholder="搜索商品、服务或商家..." 
+      [(ngModel)]="searchText"
+      (ionInput)="onSearch()"
+      animated
+      style="--min-height: 40px;">
+    </ion-searchbar>
+
+    <!-- 右侧：消息通知 + 用户头像 -->
     <ion-buttons slot="end">
-      <!-- 信息标志（有信息会显示红点）-->
+      
+    <!-- 信息标志（有信息会显示红点） -->
       <ion-button (click)="goToMessages()" class="relative-pos">
         <ion-icon name="mail-outline" slot="icon-only"></ion-icon>
-        <ion-badge *ngIf="hasUnreadMessage" color="danger" class="message-badge">●</ion-badge>
+        <span *ngIf="hasUnreadMessage" class="red-dot"></span>
       </ion-button>
-      
-      <!-- 用户头像（点击跳转用户页面）-->
+
+      <!-- 用户头像（点击跳转用户页面） -->
       <ion-avatar (click)="goToUser()" class="clickable">
         <img alt="avatar" src="https://ionicframework.com/docs/img/demos/avatar.svg" />
       </ion-avatar>
     </ion-buttons>
   </ion-toolbar>
-
-  <!-- 搜索框 + 添加图片搜索按键 -->
-  <ion-toolbar>
-    <ion-searchbar 
-      placeholder="搜索商品、服务或商家..." 
-      [(ngModel)]="searchText"
-      (ionInput)="onSearch()"
-      animated>
-    </ion-searchbar>
-    <ion-buttons slot="end">
-      <ion-button (click)="openImageSearch()">
-        <ion-label class="ion-hide-sm-down">图片搜</ion-label>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
 </ion-header>
 
+
 <!-- 可滚动内容 -->
-<ion-content [fullscreen]="true">
+<ion-content class="home-page">
   
   <!-- 图片轮播图 -->
     <!-- 轮播外层 -->
@@ -74,8 +76,7 @@
   <ion-card>
     <ion-card-header>
       <ion-card-title>热门推荐</ion-card-title>
-      <ion-card-subtitle>向下滑动查看更多</ion-card-subtitle>
-    </ion-card-header>
+    </ion-card-header> 
     <ion-card-content>
       <!-- 两列布局 -->
       <div class="product-grid">
@@ -90,10 +91,17 @@
       
       <!-- 加载更多 -->
       <div *ngIf="isLoading" class="loading-more">
-        <div class="custom-spinner"></div>
-        <span>加载中...</span>
-      </div>
-    </ion-card-content>
-  </ion-card>
-
+      <div class="custom-spinner"></div>
+      <span>加载中...</span>
+    </div>
+  </ion-card-content>
+</ion-card>
+      <!-- 底部提示：向下滑动查看更多 -->
+<div class="bottom-tip">
+  <ion-text color="medium">
+    <ion-icon name="arrow-down-outline" class="arrow-icon"></ion-icon>
+    向下滑动查看更多
+    <ion-icon name="arrow-down-outline" class="arrow-icon"></ion-icon>
+  </ion-text>
+</div>
 </ion-content>

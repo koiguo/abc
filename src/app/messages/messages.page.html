@@ -8,15 +8,8 @@
       </ion-button>
     </ion-buttons>
 
-    <!-- 中间：搜索框 -->
-    <div class="searchbar-container">
-      <ion-searchbar 
-        [(ngModel)]="searchTerm" 
-        (ionInput)="filterMessages()"
-        placeholder="搜索消息"
-        animated="true">
-      </ion-searchbar>
-    </div>
+    <!-- 中间：标题 "信息" 居中 -->
+    <ion-title class="center-title">信息</ion-title>
 
     <!-- 右侧：通讯录 + 添加 -->
     <ion-buttons slot="end">
@@ -32,7 +25,18 @@
   </ion-toolbar>
 </ion-header>
 
+<!-- 搜索框独立放在 header 下方，占满一整条 -->
+<ion-toolbar class="search-toolbar">
+  <ion-searchbar 
+    [(ngModel)]="searchTerm" 
+    (ionInput)="filterMessages()"
+    placeholder="搜索消息"
+    animated="true">
+  </ion-searchbar>
+</ion-toolbar>
+
 <ion-content class="ion-padding">
+
   <!-- 无消息提示 -->
   <div *ngIf="filteredMessages.length === 0" class="empty-state">
     <ion-icon name="chatbubbles-outline" size="large"></ion-icon>

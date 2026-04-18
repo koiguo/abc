@@ -1,4 +1,4 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA ,} from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -20,7 +20,7 @@ register();
 export class HomePage {
   // 搜索
   searchText = '';
-  hasUnreadMessage = true;  // 有未读消息显示红点
+  hasUnreadMessage = false;  // 有未读消息显示红点
   
   // 当前轮播图索引
   currentSlideIndex = 0;
@@ -53,10 +53,22 @@ export class HomePage {
     private router: Router,
     private toastController: ToastController
   ) {}
+
+   // ✅ 添加：每次进入页面时检查未读消息
+  ionViewWillEnter() {
+    this.checkUnreadMessages();
+  }
   
   // 轮播图切换事件
   onSlideChange(event: any) {
     this.currentSlideIndex = event.detail[0].activeIndex;
+  }
+
+  // ✅ 添加：检查未读消息
+  checkUnreadMessages() {
+    const unreadCount = localStorage.getItem('unreadCount');
+    this.hasUnreadMessage = unreadCount ? parseInt(unreadCount) > 0 : false;
+    console.log('未读消息数量:', unreadCount);
   }
   
   // 搜索

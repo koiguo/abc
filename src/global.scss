@@ -35,3 +35,162 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+// 标题居中
+.center-title {
+  text-align: center;
+  font-weight: 500;
+  font-size: 18px;
+}
+// 相对定位
+.relative-pos {
+  position: relative;
+}
+
+// 可点击样式
+.clickable {
+  cursor: pointer;
+}
+
+// 搜索框所在行布局
+ion-toolbar {
+  --min-height: 51px;
+  
+ion-searchbar {
+    --padding-start: 8px;
+    --padding-end: 8px;
+    padding: 4px 0;
+    --background: var(--ion-color-light);
+    --border-radius: 8px;
+  }
+  
+  ion-buttons {
+    margin-left: 8px;
+  }
+}
+
+/* ============================================
+ * 全局全屏样式 - 让所有页面占满屏幕
+ * ============================================ */
+
+// 让所有页面组件占满全屏
+:host {
+  display: block;
+  height: 100%;
+}
+
+// 确保 ion-content 占满全屏
+ion-content {
+  --offset-top: 0px;
+  --offset-bottom: 0px;
+  height: 100%;
+  width: 100%;
+}
+
+// 确保所有页面容器占满全屏
+ion-app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+ion-router-outlet {
+  flex: 1;
+  display: block;
+  height: auto;
+}
+
+/* 修复底部导航栏 - 高度刚好容纳图标和文字 */
+ion-tabs {
+  flex-shrink: 0;
+  height: auto;
+}
+
+ion-tab-bar {
+  height: 48px;
+  min-height: 48px;
+  max-height: 48px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  align-items: center;
+  padding: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --background: var(--ion-background-color);
+  --opacity: 1;
+  background: white;
+}
+
+ion-tab-button {
+  height: 48px;
+  min-height: 48px;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+ion-tab-button ion-icon {
+  font-size: 20px;
+  margin: 0;
+}
+
+ion-tab-button ion-label {
+  font-size: 10px;
+  margin: 0;
+}
+
+/* 深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  ion-tab-bar {
+    background: #1c1c1c;
+  }
+}
+
+// 修复安全区域（刘海屏适配）
+ion-content {
+  --padding-top: env(safe-area-inset-top);
+  --padding-bottom: env(safe-area-inset-bottom);
+  --padding-start: env(safe-area-inset-left);
+  --padding-end: env(safe-area-inset-right);
+}
+
+// 确保滚动内容正常
+.scroll-content {
+  height: 100%;
+}
+
+/* ============================================
+ * 全局头像大小限制
+ * ============================================ */
+
+// 限制所有 avatar 的大小
+ion-avatar {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px;
+  min-height: 40px;
+  max-width: 40px;
+  max-height: 40px;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  
+  img {
+    border-radius: 50% !important;
+    object-fit: cover !important;
+  }
+}
+
+// 在 toolbar 中的头像可以稍微小一点
+ion-toolbar ion-avatar {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px;
+  min-height: 36px;
+}
+
+// 在按钮中的头像
+ion-buttons ion-avatar {
+  width: 32px !important;
+  height: 32px !important;
+}

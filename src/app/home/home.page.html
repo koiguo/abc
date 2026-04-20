@@ -1,25 +1,16 @@
-<!-- 顶部栏 -->
 <ion-header>
-  <!-- 第一行：标题 -->
-  <ion-toolbar>
-    <ion-title class="center-title">testV1.0</ion-title>
-  </ion-toolbar>
-
-  <!-- 第二行：搜索框 + 右侧图标 -->
-  <ion-toolbar>
-  <!-- 搜索框 + 添加图片搜索按键 -->
+  <ion-toolbar class="custom-toolbar">
+    <!-- 搜索框 + 添加图片搜索按键 -->
     <ion-searchbar 
       placeholder="搜索商品、服务或商家..." 
       [(ngModel)]="searchText"
       (ionInput)="onSearch()"
-      animated
-      style="--min-height: 40px;">
+      animated>
     </ion-searchbar>
 
     <!-- 右侧：消息通知 + 用户头像 -->
     <ion-buttons slot="end">
-      
-    <!-- 信息标志（有信息会显示红点） -->
+      <!-- 信息标志（有信息会显示红点） -->
       <ion-button (click)="goToMessages()" class="relative-pos">
         <ion-icon name="mail-outline" slot="icon-only"></ion-icon>
         <span *ngIf="hasUnreadMessage" class="red-dot"></span>
@@ -33,28 +24,21 @@
   </ion-toolbar>
 </ion-header>
 
-
 <!-- 可滚动内容 -->
 <ion-content class="home-page">
-  
   <!-- 图片轮播图 -->
-    <!-- 轮播外层 -->
-    <swiper-container class="my-swiper" pagination="true">
-      <!-- 轮播1 -->
-      <swiper-slide>
-        <img src='assets\icon\home-slide\蔬菜.png' />
-      </swiper-slide>
+  <swiper-container class="my-swiper" pagination="true">
+    <swiper-slide>
+      <img src='assets/icon/home-slide/蔬菜.png' />
+    </swiper-slide>
+    <swiper-slide>
+      <img src='assets/icon/home-slide/日常.png' />
+    </swiper-slide>
+    <swiper-slide>
+      <img src='assets/icon/home-slide/科技.png' />
+    </swiper-slide>
+  </swiper-container>
 
-      <!-- 轮播2 -->
-      <swiper-slide>
-        <img src='assets\icon\home-slide\日常.png' />
-      </swiper-slide>
-
-      <!-- 轮播3 -->
-      <swiper-slide>
-        <img src='assets\icon\home-slide\科技.png' />
-      </swiper-slide>
-    </swiper-container>
   <!-- 功能按钮-->
   <ion-card>
     <ion-card-header>
@@ -76,7 +60,7 @@
   <ion-card>
     <ion-card-header>
       <ion-card-title>热门推荐</ion-card-title>
-    </ion-card-header> 
+    </ion-card-header>
     <ion-card-content>
       <!-- 两列布局 -->
       <div class="product-grid">
@@ -88,20 +72,21 @@
           </div>
         </div>
       </div>
-      
+
       <!-- 加载更多 -->
       <div *ngIf="isLoading" class="loading-more">
-      <div class="custom-spinner"></div>
-      <span>加载中...</span>
-    </div>
-  </ion-card-content>
-</ion-card>
-      <!-- 底部提示：向下滑动查看更多 -->
-<div class="bottom-tip">
-  <ion-text color="medium">
-    <ion-icon name="arrow-down-outline" class="arrow-icon"></ion-icon>
-    向下滑动查看更多
-    <ion-icon name="arrow-down-outline" class="arrow-icon"></ion-icon>
-  </ion-text>
-</div>
+        <div class="custom-spinner"></div>
+        <span>加载中...</span>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- 底部提示：向下滑动查看更多 -->
+  <div class="bottom-tip">
+    <ion-text color="medium">
+      <ion-icon name="arrow-down-outline" class="arrow-icon"></ion-icon>
+      向下滑动查看更多
+      <ion-icon name="arrow-down-outline" class="arrow-icon"></ion-icon>
+    </ion-text>
+  </div>
 </ion-content>

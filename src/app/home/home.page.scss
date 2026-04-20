@@ -1,3 +1,47 @@
+.search-header {
+  padding-top: 12px;      // 顶部留出距离
+  padding-bottom: 4px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+  
+.search-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding-top: 12px;  // 顶部留出距离
+  padding-bottom: 4px;
+
+ion-toolbar {
+  --min-height: 56px;  // 让高度自适应
+  --padding-start: 0;
+  --padding-end: 0;
+  padding: 0;
+}
+  
+  ion-searchbar {
+    background-color: #ff0d00;
+    // flex: 1;
+    // --border-radius: 8px;
+    // --box-shadow: none;
+    // --background: var(--ion-color-light);
+    // --padding-start: 12px;
+    // --padding-end: 12px;
+    // --min-height: 44px;
+  }
+  
+  ion-buttons {
+   margin-left: 8px;
+    display: flex;
+    align-items: center;
+  }
+    ion-avatar {
+    width: 36px;
+    height: 36px;
+  }
+}
+
 // 消息红点
   .red-dot {
     position: absolute;
@@ -36,6 +80,7 @@ swiper-slide img {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   text-align: center;
   cursor: pointer;
   

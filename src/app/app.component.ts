@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';  // ✅ 添加 OnInit
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
@@ -13,12 +13,13 @@ import { ToastController, AlertController, ActionSheetController } from '@ionic/
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
   standalone: true,
-  imports: [IonicModule, RouterModule, CommonModule]
+  imports: [IonicModule, RouterModule, CommonModule],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-
-export class AppComponent {
+export class AppComponent implements OnInit {  // ✅ 添加 implements OnInit
   // 控制底部导航栏的显示/隐藏
   showTabs = false;
+  currentUrl: string = '';  // ✅ 添加 currentUrl 属性
 
   constructor(
     private router: Router,
@@ -34,14 +35,17 @@ export class AppComponent {
       'chatbubbles-outline': chatbubblesOutline,
       'person-outline': personOutline
     });
+  }
 
+  // ✅ 使用 ngOnInit 而不是 constructor 中处理路由
+  ngOnInit() {
     // 监听路由变化，控制导航栏显示/隐藏
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
-        const currentUrl = event.urlAfterRedirects;
+        this.currentUrl = event.urlAfterRedirects;  // ✅ 更新 currentUrl
         // 在登录页和注册页隐藏导航栏，其他页面显示
-        this.showTabs = !(currentUrl.includes('/login') || currentUrl.includes('/register'));
-        console.log('当前路由:', currentUrl, '显示导航栏:', this.showTabs);
+        this.showTabs = !(this.currentUrl.includes('/login') || this.currentUrl.includes('/register'));
+        console.log('当前路由:', this.currentUrl, '显示导航栏:', this.showTabs);
       }
     });
   }
@@ -60,10 +64,15 @@ export class AppComponent {
   }
 
   goToUser() {
-    this.router.navigate(['/user']);
+    console.log('点击跳转到用户页面');
+    this.router.navigate(['/user']).then(success => {
+      console.log('跳转结果:', success);
+    }).catch(err => {
+      console.error('跳转失败:', err);
+    });
   }
 
-  // ========== 相机功能（你原有的代码，保持不变）==========
+  // ========== 相机功能 ==========
   async openCamera() {
     // 移动端使用 Capacitor
     if (Capacitor.isNativePlatform()) {

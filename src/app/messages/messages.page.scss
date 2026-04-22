@@ -1,25 +1,4 @@
-// // ============================================
-// // 消息页面样式
-// // ============================================
-
-// // 1. 覆盖全局头像样式（使用更高优先级的选择器）
-// ion-avatar.message-avatar {
-//   width: 44px !important;
-//   height: 44px !important;
-//   min-width: 44px !important;
-//   min-height: 44px !important;
-//   max-width: 44px !important;
-//   max-height: 44px !important;
-  
-//   img {
-//     width: 100% !important;
-//     height: 100% !important;
-//     object-fit: cover !important;
-//     border-radius: 50% !important;
-//   }
-// }
-
-// // 2. 消息列表项样式
+// 消息列表项样式
 .message-item {
   --padding-start: 12px;
   --padding-end: 12px;

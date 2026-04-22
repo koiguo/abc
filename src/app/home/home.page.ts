@@ -1,9 +1,10 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IonicModule, ToastController } from '@ionic/angular';
 import { register } from 'swiper/element/bundle';
+import { RouterModule } from '@angular/router';
 
 register();
 
@@ -13,11 +14,11 @@ register();
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
   standalone: true,          
-  imports: [CommonModule, FormsModule, IonicModule],
+  imports: [CommonModule, FormsModule, IonicModule, RouterModule],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 
-export class HomePage {
+export class HomePage implements OnInit {
   // 搜索
   searchText = '';
   hasUnreadMessage = false;  // 有未读消息显示红点
@@ -53,9 +54,17 @@ export class HomePage {
     private router: Router,
     private toastController: ToastController
   ) {}
+   ngOnInit() {
+    console.log('HomePage ngOnInit - 组件初始化');
+    // 在这里放置组件初始化逻辑
+    this.checkUnreadMessages();
+    // 其他初始化逻辑可以加在这里
+  }
 
    // ✅ 添加：每次进入页面时检查未读消息
   ionViewWillEnter() {
+    console.log('HomePage ionViewWillEnter - 每次进入页面');
+    // 每次进入页面时刷新数据
     this.checkUnreadMessages();
   }
   

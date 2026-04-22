@@ -1,11 +1,10 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { provideIonicAngular } from '@ionic/angular/standalone';
+import { provideHttpClient } from '@angular/common/http';
 import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
-import { provideHttpClient } from '@angular/common/http';
 import { addIcons } from 'ionicons';
-
 import { 
   mailOutline, chevronForwardOutline,trendingUpOutline,cartOutline,arrowBackOutline,searchOutline,settingsOutline,
   locationOutline,heartOutline,cameraOutline,trashOutline,addOutline,peopleOutline,ticketOutline,bagCheckOutline,ellipsisHorizontalOutline,
@@ -47,8 +46,11 @@ addIcons({
 
 bootstrapApplication(AppComponent, {
   providers: [
-    provideIonicAngular(),
     provideRouter(routes),
+        provideIonicAngular({
+      mode: 'md',
+      innerHTMLTemplatesEnabled: true
+    }),
     provideHttpClient()
   ]
-});
+}).catch(err => console.error(err));

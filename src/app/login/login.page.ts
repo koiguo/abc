@@ -1,23 +1,24 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';  // ✅ 添加 OnInit
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import { ToastController, LoadingController } from '@ionic/angular';
+import { ToastController, LoadingController, NavController  } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 
 @Component({
   selector: 'app-login',
-  templateUrl: './login.html',
+  templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
   standalone: true,
-    imports: [
+  imports: [
     CommonModule,    // 提供 ngIf, ngFor 等
     FormsModule,     // 提供 ngModel
     IonicModule      // ✅ 提供 ion-button, ion-input 等 Ionic 组件
   ]
 })
-export class LoginPage {
+export class LoginPage implements OnInit {  // ✅ 添加 implements OnInit
+  
   loginData = {
     account: '',  // 用户名或手机号
     password: ''
@@ -28,8 +29,24 @@ export class LoginPage {
     private authService: AuthService,
     private router: Router,
     private toastController: ToastController,
-    private loadingController: LoadingController
+    private loadingController: LoadingController,
+    private navController: NavController
   ) {}
+
+  goBack() {
+    console.log('返回按钮被点击');
+    this.navController.back();
+  }
+  
+  // ✅ 添加 ngOnInit 方法
+  ngOnInit() {
+    console.log('LoginPage 初始化');
+    // 可以在这里添加检查是否已登录的逻辑
+    // 例如：如果已登录，直接跳转到首页
+    // if (this.authService.isLoggedIn()) {
+    //   this.router.navigate(['/home']);
+    // }
+  }
 
   async login() {
     // 表单验证

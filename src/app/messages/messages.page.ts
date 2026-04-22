@@ -1,4 +1,4 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit  } from '@angular/core';
+import { Component, OnInit } from '@angular/core';  // ✅ 删除 CUSTOM_ELEMENTS_SCHEMA
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
@@ -8,14 +8,14 @@ import { ToastController } from '@ionic/angular';
   selector: 'app-messages',
   templateUrl: './messages.page.html',
   styleUrls: ['./messages.page.scss'],
-  standalone: true,           // 👈 关键
-  imports: [CommonModule, IonicModule,FormsModule],  // 👈 关键
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+  standalone: true,
+  imports: [CommonModule, IonicModule, FormsModule],
+  // ✅ 删除 schemas: [CUSTOM_ELEMENTS_SCHEMA]（IonicModule 已经提供了所有组件）
 })
 export class MessagesPage implements OnInit {
   searchTerm: string = '';
   messages: any[] = [];
-   filteredMessages: any[] = [];
+  filteredMessages: any[] = [];
 
   constructor(private toastController: ToastController) {}
 
@@ -36,7 +36,6 @@ export class MessagesPage implements OnInit {
     const totalUnread = this.messages.reduce((total, msg) => total + msg.unread, 0);
     localStorage.setItem('unreadCount', totalUnread.toString());
   }
-  
 
   // 搜索过滤逻辑
   filterMessages() {

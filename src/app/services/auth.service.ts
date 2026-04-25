@@ -7,7 +7,7 @@ import { tap } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:5000/api';
+  private apiUrl = 'https://guoguo.pythonanywhere.com/api';
   private isLoggedInSubject = new BehaviorSubject<boolean>(this.hasToken());
   
   constructor(private http: HttpClient) { }
@@ -26,7 +26,7 @@ export class AuthService {
     return userStr ? JSON.parse(userStr) : null;
   }
    login(account: string, password: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login`, { account, password })
+    return this.http.post(`https://guoguo.pythonanywhere.com/api/login`, { account, password })
       .pipe(
         tap((response: any) => {
             console.log('登录响应数据:', response);

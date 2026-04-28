@@ -19,7 +19,10 @@ server: {
     // 允许混合内容（HTTP 和 HTTPS 混合）
     allowMixedContent: true,
   },
-  
+  //  ios: {
+  //   contentInset: 'always',
+  //   // iOS 相关配置，默认也支持深色模式
+  // }
 };
 
 

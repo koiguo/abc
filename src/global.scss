@@ -123,13 +123,6 @@ ion-tab-button ion-label {
   margin: 0;
 }
 
-/* 深色模式适配 */
-@media (prefers-color-scheme: dark) {
-  ion-tab-bar {
-    background: #1c1c1c;
-  }
-}
-
 // 修复安全区域（刘海屏适配）
 ion-content {
   --padding-top: env(safe-area-inset-top);
@@ -147,24 +140,7 @@ ion-content {
  * 全局头像大小限制
  * ============================================ */
 
-// 限制所有 avatar 的大小
-// ion-avatar {
-//   width: 40px !important;
-//   height: 40px !important;
-//   min-width: 40px;
-//   min-height: 40px;
-//   max-width: 40px;
-//   max-height: 40px;
-//   border-radius: 50% !important;
-//   overflow: hidden !important;
-  
-//   img {
-//     border-radius: 50% !important;
-//     object-fit: cover !important;
-//   }
-// }
-
-// 在 toolbar 中的头像可以稍微小一点
+// 在 toolbar 中的头像
 ion-toolbar ion-avatar {
   width: 36px !important;
   height: 36px !important;
@@ -176,4 +152,72 @@ ion-toolbar ion-avatar {
 ion-buttons ion-avatar {
   width: 32px !important;
   height: 32px !important;
+}
+
+/* ============================================
+ * 深色模式适配 - 图标自动变白色
+ * ============================================ */
+
+@media (prefers-color-scheme: dark) {
+  // 1. 底部导航栏背景
+  ion-tab-bar {
+    background: #1c1c1c;
+  }
+  
+  // 2. 底部导航栏图标和文字变白色（未选中状态）
+  ion-tab-button {
+    ion-icon {
+      color: #e0e0e0 !important;
+    }
+    
+    ion-label {
+      color: #b0b0b0 !important;
+    }
+    
+    // 3. 选中状态用主题亮蓝色
+    &.tab-selected {
+      ion-icon {
+        color: var(--ion-color-primary) !important;
+      }
+      
+      ion-label {
+        color: var(--ion-color-primary) !important;
+      }
+    }
+  }
+  
+  // 4. 用户页面所有图标变白色
+  app-user ion-icon {
+    color: #ffffff !important;
+  }
+  
+  // 5. 用户页面功能按钮图标
+  .function-grid ion-icon {
+    color: #ffffff !important;
+  }
+  
+  // 6. 全局所有页面图标基础颜色
+  ion-icon {
+    color: #ffffff !important;
+  }
+  
+  // 7. 列表项图标
+  ion-item ion-icon {
+    color: #e0e0e0 !important;
+  }
+  
+  // 8. 工具栏图标
+  ion-toolbar ion-icon {
+    color: #ffffff !important;
+  }
+  
+  // 9. 卡片图标
+  ion-card ion-icon {
+    color: #e0e0e0 !important;
+  }
+  
+  // 10. 按钮内的图标（继承按钮颜色）
+  ion-button ion-icon {
+    color: inherit !important;
+  }
 }

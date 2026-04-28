@@ -149,7 +149,7 @@ export class UserPage implements OnInit {  // ✅ 添加 implements OnInit
           text: '退出',
           handler: () => {
             this.authService.logout();
-            this.router.navigate(['/login']);
+            this.router.navigate(['/home']);
             this.showAlert('提示', '已退出登录');
           }
         }

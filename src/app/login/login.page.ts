@@ -33,19 +33,10 @@ export class LoginPage implements OnInit {  // ✅ 添加 implements OnInit
     private navController: NavController
   ) {}
 
-  goBack() {
-    console.log('返回按钮被点击');
-    this.navController.back();
-  }
   
   // ✅ 添加 ngOnInit 方法
   ngOnInit() {
     console.log('LoginPage 初始化');
-    // 可以在这里添加检查是否已登录的逻辑
-    // 例如：如果已登录，直接跳转到首页
-    // if (this.authService.isLoggedIn()) {
-    //   this.router.navigate(['/home']);
-    // }
   }
 
   async login() {
@@ -96,6 +87,11 @@ export class LoginPage implements OnInit {  // ✅ 添加 implements OnInit
   }
 
   goToRegister() {
-    this.router.navigate(['/register']);
+    this.router.navigate(['/register'], { replaceUrl: true });
+  }
+
+    goBack() {
+    console.log('返回按钮被点击');
+    this.navController.back();
   }
 }

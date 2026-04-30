@@ -221,3 +221,14 @@ ion-buttons ion-avatar {
     color: inherit !important;
   }
 }
+.chat-modal {
+  --height: 80%;
+  --width: 100%;
+  --border-radius: 16px 16px 0 0;
+  
+  @media (min-width: 768px) {
+    --width: 500px;
+    --height: 70%;
+    --border-radius: 16px;
+  }
+}

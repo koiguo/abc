@@ -43,26 +43,27 @@
     <p>暂无消息</p>
   </div>
 
-  <!-- 消息列表 -->
-  <ion-list *ngIf="filteredMessages.length > 0" class="messages-list">
-    <ion-item *ngFor="let message of filteredMessages" class="message-item">
-      <ion-avatar slot="start" class="message-avatar">
-        <img [src]="message.avatar" alt="avatar">
-      </ion-avatar>
-
-      <ion-label>
-        <h2>{{ message.name }}</h2>
-        <p>{{ message.lastMessage }}</p>
-      </ion-label>
-
-      <ion-badge slot="end" *ngIf="message.unread > 0" color="danger">
-        {{ message.unread }}
-      </ion-badge>
-    </ion-item>
+ <!-- 消息列表 -->
+<ion-list *ngIf="filteredMessages.length > 0" class="messages-list">
+  <!-- ✅ 只在这一行添加 (click) 事件，其他内容完全不变 -->
+  <ion-item *ngFor="let message of filteredMessages" class="message-item" (click)="openChat(message.user_id, message.name)">
     
-    <!-- 到底提示 -->
-    <div class="end-tip">
-      <ion-text color="medium">—— 到底咯！ ——</ion-text>
-    </div>
-  </ion-list>
-</ion-content>
+    <ion-avatar slot="start" class="message-avatar">
+      <img [src]="message.avatar" alt="avatar">
+    </ion-avatar>
+
+    <ion-label>
+      <h2>{{ message.name }}</h2>
+      <p>{{ message.lastMessage }}</p>
+    </ion-label>
+
+    <ion-badge slot="end" *ngIf="message.unread > 0" color="danger">
+      {{ message.unread }}
+    </ion-badge>
+  </ion-item>
+  
+  <!-- 到底提示 -->
+  <div class="end-tip">
+    <ion-text color="medium">—— 到底咯！ ——</ion-text>
+  </div>
+</ion-list>

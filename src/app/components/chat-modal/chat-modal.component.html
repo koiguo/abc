@@ -1,0 +1,49 @@
+<ion-header>
+  <ion-toolbar>
+    <!-- 最左边：返回按钮 -->
+    <ion-buttons slot="start">
+      <ion-button (click)="dismiss()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <!-- 正中间：用户昵称 -->
+    <ion-title>{{ targetUserName }}</ion-title>
+
+    <!-- 最右边：更多按钮（预留，暂不添加功能） -->
+    <ion-buttons slot="end">
+      <ion-button (click)="showMoreOptions()">
+        <ion-icon name="ellipsis-vertical-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- 消息列表 -->
+  <div class="messages-container" #messageContent>
+    <div *ngFor="let msg of messages" 
+         class="message-item" 
+         [class.my-message]="msg.fromUserId === currentUser?.id"
+         [class.other-message]="msg.fromUserId !== currentUser?.id">
+      <div class="message-bubble">
+        {{ msg.content }}
+      </div>
+      <div class="message-time">{{ msg.timestamp | date:'HH:mm' }}</div>
+    </div>
+  </div>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-item lines="none">
+      <ion-input [(ngModel)]="newMessage" 
+                 placeholder="输入消息..."
+                 (keyup.enter)="sendMessage()">
+      </ion-input>
+      <ion-button slot="end" (click)="sendMessage()" [disabled]="!newMessage.trim()">
+        <ion-icon name="send-outline"></ion-icon>
+      </ion-button>
+    </ion-item>
+  </ion-toolbar>
+</ion-footer>

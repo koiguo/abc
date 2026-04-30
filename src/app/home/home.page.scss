@@ -190,3 +190,92 @@ swiper-slide img {
     vertical-align: middle;
   }
 }
+// ============================================
+// 深色模式适配
+// ============================================
+@media (prefers-color-scheme: dark) {
+  
+  // 1. 搜索框背景
+  .custom-toolbar {
+    --background: #1a1a1a;
+  }
+  
+  ion-searchbar {
+    --background: #2a2a2a;
+    --color: #ffffff;
+    --placeholder-color: #888888;
+  }
+  
+  // 2. 卡片背景
+  ion-card {
+    background: #1e1e1e !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  ion-card-title {
+    color: #ffffff !important;
+  }
+  
+  ion-card-content {
+    color: #d0d0d0;
+  }
+  
+  // 3. 功能图标和文字
+  .function-item {
+    .function-icon {
+      ion-icon {
+        color: #a78bfa;
+      }
+    }
+    
+    ion-label {
+      color: #e0e0e0;
+    }
+  }
+  
+  // 4. 产品卡片 - 重点修改
+  .product-card {
+    background: #2a2a2a !important;  // 深色背景
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    
+    .product-info {
+      h3 {
+        color: #e0e0e0 !important;  // 标题白色
+      }
+      
+      .price {
+        color: #ff6b7c !important;  // 价格亮红色
+      }
+    }
+  }
+  
+  // 5. 轮播图容器
+  .my-swiper {
+    background: #1a1a1a;
+  }
+  
+  // 6. 加载更多
+  .loading-more {
+    color: #b0b0b0;
+    
+    .custom-spinner {
+      border-color: #444444;
+      border-top-color: #a78bfa;
+    }
+  }
+  
+  // 7. 底部提示
+  .bottom-tip {
+    color: #a0a0a0;
+  }
+  
+  // 8. 消息红点（保持红色）
+  .red-dot {
+    background-color: #ff0d00;
+  }
+  
+  // 9. 消息按钮图标
+  ion-button ion-icon {
+    color: #e0e0e0;
+  }
+}

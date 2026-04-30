@@ -1,0 +1,112 @@
+ion-title {
+  text-align: center;
+}
+
+ion-buttons {
+  z-index: 10;
+}
+.messages-container {
+  height: 100%;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.message-item {
+  display: flex;
+  flex-direction: column;
+  max-width: 80%;
+  
+  &.my-message {
+    align-self: flex-end;
+    
+    .message-bubble {
+      background: var(--ion-color-primary);
+      color: white;
+      border-radius: 18px 18px 4px 18px;
+    }
+    
+    .message-time {
+      text-align: right;
+    }
+  }
+  
+  &.other-message {
+    align-self: flex-start;
+    
+    .message-bubble {
+      background: #f1f1f1;
+      color: #333;
+      border-radius: 18px 18px 18px 4px;
+    }
+  }
+}
+
+.message-bubble {
+  padding: 10px 14px;
+  font-size: 14px;
+  word-wrap: break-word;
+}
+
+.message-time {
+  font-size: 10px;
+  color: #999;
+  margin-top: 4px;
+  padding: 0 4px;
+}
+
+// 深色模式适配
+@media (prefers-color-scheme: dark) {
+  .other-message .message-bubble {
+    background: #2a2a2a;
+    color: #e0e0e0;
+  }
+}
+
+// 发送按钮样式
+ion-button {
+  --background: #667eea;           // 背景色
+  --background-hover: #5a67d8;
+  --border-radius: 30px;
+  margin: 0 8px;
+  width: 44px;
+  height: 44px;
+  
+  ion-icon {
+    font-size: 20px;
+    color: rgb(3, 3, 3);
+  }
+  
+  // 禁用状态
+  &[disabled] {
+    --background: #cccccc;
+    opacity: 0.6;
+  }
+}
+
+// 深色模式
+@media (prefers-color-scheme: dark) {
+  ion-button {
+    --background: #667eea;
+    
+    &[disabled] {
+      --background: #444444;
+    }
+  }
+}
+
+// 输入框样式
+ion-input {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --background: #f5f5f5;
+  --border-radius: 24px;
+  
+  @media (prefers-color-scheme: dark) {
+    --background: #2a2a2a;
+    --color: #ffffff;
+    --placeholder-color: #888888;
+  }
+}

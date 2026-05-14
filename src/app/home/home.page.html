@@ -56,37 +56,52 @@
     </ion-card-content>
   </ion-card>
 
+<!-- 只有管理员能看到 -->
+<ion-button *ngIf="showAdminEntry()" (click)="goToAdmin()" expand="full" color="primary">
+  <ion-icon name="settings-outline" slot="start"></ion-icon>
+  管理后台
+</ion-button>
+
   <!-- 产品图 -->
   <ion-card>
     <ion-card-header>
       <ion-card-title>热门推荐</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      <!-- 两列布局 -->
-      <div class="product-grid">
-        <div *ngFor="let product of products" class="product-card" (click)="viewProduct(product)">
-          <img [src]="product.imageUrl" class="product-image">
-          <div class="product-info">
-            <h3>{{ product.name }}</h3>
-            <p class="price">{{ product.price }}</p>
+     <div class="product-grid" *ngIf="products.length > 0">
+          <div *ngFor="let product of products" class="product-card" (click)="viewProduct(product)">
+            <!-- 商品图片（使用 product.image，如果没有则用随机图片） -->
+            <img [src]="product.image || 'https://picsum.photos/200/200?random=' + product.id" class="product-image">
+            <div class="product-info">
+              <h3>{{ product.name }}</h3>
+              <p class="price">¥{{ product.price }}</p>
+              <!-- ✅ 显示原价（如果有） -->
+              <p class="original-price" *ngIf="product.original_price && product.original_price !== '0.00' && product.original_price !== 0">
+               原价 ¥{{ product.original_price }}
+              </p>
+              <!-- ✅ 显示标签 -->
+              <div class="product-tags">
+                <span class="hot-tag" *ngIf="product.is_hot">热卖</span>
+                <span class="new-tag" *ngIf="product.is_new">新品</span>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- 加载更多 -->
-      <div *ngIf="isLoading" class="loading-more">
-        <div class="custom-spinner"></div>
-        <span>加载中...</span>
-      </div>
-    </ion-card-content>
-  </ion-card>
+        <!-- ✅ 无商品时显示 -->
+        <div class="empty-products" *ngIf="products.length === 0">
+          <ion-icon name="cart-outline"></ion-icon>
+          <p>暂无商品，请稍后再试</p>
+        </div>        
+      </ion-card-content>
+    </ion-card>
 
-  <!-- 底部提示：向下滑动查看更多 -->
-  <div class="bottom-tip">
-    <ion-text color="medium">
-      <ion-icon name="arrow-down-outline" class="arrow-icon"></ion-icon>
-      向下滑动查看更多
-      <ion-icon name="arrow-down-outline" class="arrow-icon"></ion-icon>
-    </ion-text>
-  </div>
+    <!-- 底部提示：向下滑动查看更多 -->
+    <div class="bottom-tip">
+      <ion-text color="medium">
+        <ion-icon name="arrow-down-outline" class="arrow-icon"></ion-icon>
+        向下滑动查看更多
+        <ion-icon name="arrow-down-outline" class="arrow-icon"></ion-icon>
+      </ion-text>
+    </div>
 </ion-content>

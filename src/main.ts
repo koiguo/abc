@@ -9,6 +9,8 @@ import {
   mailOutline, chevronForwardOutline,trendingUpOutline,cartOutline,arrowBackOutline,searchOutline,settingsOutline,
   locationOutline,heartOutline,cameraOutline,trashOutline,addOutline,peopleOutline,ticketOutline,bagCheckOutline,ellipsisHorizontalOutline,
   qrCodeOutline,personCircleOutline,lockClosedOutline,callOutline,arrowDownOutline,closeOutline,sendOutline,ellipsisVerticalOutline,flagOutline,
+  addCircleOutline,cropOutline
+
   
 } from 'ionicons/icons';
 
@@ -47,6 +49,8 @@ addIcons({
   'send-outline':sendOutline,
   'ellipsis-vertical-outline':ellipsisVerticalOutline,
   'flag-outline':flagOutline,
+  'add-circle-outline':addCircleOutline,
+  'crop-outline':cropOutline
 })
 
 bootstrapApplication(AppComponent, {

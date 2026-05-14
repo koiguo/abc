@@ -1,0 +1,35 @@
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 60vh;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 50px;
+  color: var(--ion-color-medium);
+}
+
+.form-container {
+  padding: 16px;
+}
+
+.form-buttons {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.admin-entry-card {
+  margin: 12px;
+  border-radius: 16px;
+  background: var(--ion-color-primary);
+  color: white;
+  cursor: pointer;
+  
+  ion-card-content {
+    padding: 12px;
+  }
+}

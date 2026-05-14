@@ -60,10 +60,21 @@ export class LoginPage implements OnInit {  // ✅ 添加 implements OnInit
           await loading.dismiss();
           
           if (response.success) {
-            console.log('登录成功，保存的用户信息:', response.data.user);
+            console.log('登录成功，保存的用户信息:', response.data.user.role);
+
+            localStorage.setItem('user', JSON.stringify(response.data.user));
+            localStorage.setItem('userRole', response.data.user.role || 'user');
+
             this.showToast('登录成功！', 'success');
-            // 跳转到用户主页
-            this.router.navigate(['/home']);
+            
+            //  根据角色跳转不同页面
+            if (response.data.user.role === 'admin') {
+              console.log('管理员登录，跳转到管理页面');
+              this.router.navigate(['/admin']);
+            } else {
+              console.log('普通用户登录，跳转到首页');
+              this.router.navigate(['/home']);
+            }
           } else {
             this.showToast(response.message || '登录失败', 'danger');
           }

@@ -9,5 +9,7 @@ export const routes: Routes = [
   { path: 'register', loadComponent: () => import('./register/register.page').then(m => m.RegisterPage) },
   { path: 'category', loadComponent: () => import('./category/category.page').then(m => m.CategoryPage) },
   { path: 'camera', loadComponent: () => import('./camera/camera.page').then(m => m.CameraPage) },
+  { path: 'admin', loadComponent: () => import('./admin/admin.page').then( m => m.AdminPage)},
+  { path: 'product-detail', loadComponent: () => import('./product-detail/product-detail.page').then( m => m.ProductDetailPage)},
   { path: '**', redirectTo: '/home' }
 ];

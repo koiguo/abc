@@ -9,7 +9,8 @@ import {
   mailOutline, chevronForwardOutline,trendingUpOutline,cartOutline,arrowBackOutline,searchOutline,settingsOutline,
   locationOutline,heartOutline,cameraOutline,trashOutline,addOutline,peopleOutline,ticketOutline,bagCheckOutline,ellipsisHorizontalOutline,
   qrCodeOutline,personCircleOutline,lockClosedOutline,callOutline,arrowDownOutline,closeOutline,sendOutline,ellipsisVerticalOutline,flagOutline,
-  addCircleOutline,cropOutline
+  addCircleOutline,cropOutline,gridOutline,pawOutline,closeCircleOutline,waterOutline,fastFoodOutline,medkitOutline,cashOutline,carOutline,cubeOutline
+  
 
   
 } from 'ionicons/icons';
@@ -50,7 +51,16 @@ addIcons({
   'ellipsis-vertical-outline':ellipsisVerticalOutline,
   'flag-outline':flagOutline,
   'add-circle-outline':addCircleOutline,
-  'crop-outline':cropOutline
+  'crop-outline':cropOutline,
+  'grid-outline':gridOutline,
+  'paw-outline':pawOutline,
+  'close-circle-outline':closeCircleOutline,
+  'water-outline':waterOutline,
+  'fast-food-outline':fastFoodOutline,
+  'medkit-outline':medkitOutline,
+  'cash-outline':cashOutline,
+  'car-outline':carOutline,
+  'cube-outline':cubeOutline,
 })
 
 bootstrapApplication(AppComponent, {

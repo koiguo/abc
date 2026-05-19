@@ -43,16 +43,16 @@ ion-toolbar {
 }
 
 // 消息红点
-  .red-dot {
-    position: absolute;
-    top: -2px;
-    right: -2px;
-    width: 10px;
-    height: 10px;
-    background-color: #ff0d00;
-    border-radius: 50%;
-    display: block;
-  }
+.red-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 10px;
+  height: 10px;
+  background-color: #ff0d00;
+  border-radius: 50%;
+  display: block;
+}
 
 // 轮播图
 .my-swiper {
@@ -76,7 +76,9 @@ swiper-slide img {
   margin: 4px 0;
 }
 
+// 功能项基础样式
 .function-item {
+  position: relative;  // 用于删除图标定位
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -85,8 +87,8 @@ swiper-slide img {
   cursor: pointer;
   
   .function-icon {
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
     border-radius: 25px;
     background: transparent;
     display: flex;
@@ -95,13 +97,59 @@ swiper-slide img {
     margin-bottom: 8px;
     
     ion-icon {
-      font-size: 24px;
+      font-size: 28px;
       color: #3880ff;
     }
   }
   
   ion-label {
     font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  
+  // 删除图标（右上角）
+  .delete-icon {
+    position: absolute;
+    top: -8px;
+    right: 5px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    
+    ion-icon {
+      font-size: 18px;
+      color: #ff4d4f;
+      background: transparent;
+    }
+  }
+  
+  // 鼠标悬停时显示删除图标
+  &:hover .delete-icon {
+    opacity: 1;
+  }
+}
+
+// 添加按钮样式（和普通功能一样大小）
+.add-item {
+  opacity: 0.75;
+  
+  .function-icon ion-icon {
+    color: var(--ion-color-medium, #888);
+  }
+  
+  ion-label {
+    color: var(--ion-color-medium, #888);
   }
 }
 
@@ -121,14 +169,14 @@ swiper-slide img {
   
   .product-image-container {
     width: 100%;
-    aspect-ratio: 1 / 1;  // 强制 1:1 正方形
+    aspect-ratio: 1 / 1;
     overflow: hidden;
     background-color: #f5f5f5;
     
     .product-image {
       width: 100%;
       height: 100%;
-      object-fit: cover;  // 图片覆盖整个容器，保持比例裁剪
+      object-fit: cover;
     }
   }
   
@@ -197,12 +245,12 @@ swiper-slide img {
     vertical-align: middle;
   }
 }
+
 // ============================================
 // 深色模式适配
 // ============================================
 @media (prefers-color-scheme: dark) {
   
-  // 1. 搜索框背景
   .custom-toolbar {
     --background: #1a1a1a;
   }
@@ -213,7 +261,6 @@ swiper-slide img {
     --placeholder-color: #888888;
   }
   
-  // 2. 卡片背景
   ion-card {
     background: #1e1e1e !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -227,7 +274,6 @@ swiper-slide img {
     color: #d0d0d0;
   }
   
-  // 3. 功能图标和文字
   .function-item {
     .function-icon {
       ion-icon {
@@ -238,30 +284,46 @@ swiper-slide img {
     ion-label {
       color: #e0e0e0;
     }
-  }
-  
-  // 4. 产品卡片 - 重点修改
-  .product-card {
-    background: #2a2a2a !important;  // 深色背景
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     
-    .product-info {
-      h3 {
-        color: #e0e0e0 !important;  // 标题白色
-      }
+    // 深色模式下的删除图标背景
+    .delete-icon {
+      background: #2a2a2a;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
       
-      .price {
-        color: #ff6b7c !important;  // 价格亮红色
+      ion-icon {
+        color: #ff6b7c;
       }
     }
   }
   
-  // 5. 轮播图容器
+  .add-item {
+    .function-icon ion-icon {
+      color: #888;
+    }
+    ion-label {
+      color: #888;
+    }
+  }
+  
+  .product-card {
+    background: #2a2a2a !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    
+    .product-info {
+      h3 {
+        color: #e0e0e0 !important;
+      }
+      
+      .price {
+        color: #ff6b7c !important;
+      }
+    }
+  }
+  
   .my-swiper {
     background: #1a1a1a;
   }
   
-  // 6. 加载更多
   .loading-more {
     color: #b0b0b0;
     
@@ -271,22 +333,22 @@ swiper-slide img {
     }
   }
   
-  // 7. 底部提示
   .bottom-tip {
     color: #a0a0a0;
   }
   
-  // 8. 消息红点（保持红色）
   .red-dot {
     background-color: #ff0d00;
   }
   
-  // 9. 消息按钮图标
   ion-button ion-icon {
     color: #e0e0e0;
   }
 }
-// 新增：加载状态样式
+
+// ============================================
+// 加载状态样式
+// ============================================
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -304,7 +366,10 @@ swiper-slide img {
     color: var(--ion-color-medium);
   }
 }
-// 新增：空状态样式
+
+// ============================================
+// 空状态样式
+// ============================================
 .empty-products {
   display: flex;
   flex-direction: column;
@@ -322,7 +387,10 @@ swiper-slide img {
     color: var(--ion-color-medium);
   }
 }
-// 新增：商品标签样式
+
+// ============================================
+// 商品标签样式
+// ============================================
 .product-tags {
   margin-top: 8px;
   display: flex;
@@ -346,7 +414,10 @@ swiper-slide img {
     display: inline-block;
   }
 }
-// 新增：原价样式
+
+// ============================================
+// 原价样式
+// ============================================
 .product-info {
   .original-price {
     text-decoration: line-through;

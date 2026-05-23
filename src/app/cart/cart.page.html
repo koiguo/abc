@@ -1,0 +1,51 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goToUser()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>购物车</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+  </div>
+  
+  <div *ngIf="!isLoading && cartItems.length === 0" class="empty-cart">
+    <ion-icon name="cart-outline"></ion-icon>
+    <p>购物车是空的</p>
+    <ion-button (click)="goToHome()">去购物</ion-button>
+  </div>
+  
+  <ion-list *ngIf="!isLoading && cartItems.length > 0">
+    <ion-item *ngFor="let item of cartItems">
+      <ion-thumbnail slot="start">
+        <img [src]="item.image || 'https://picsum.photos/60/60?random=' + item.product_id">
+      </ion-thumbnail>
+      <ion-label>
+        <h2>{{ item.name }}</h2>
+        <p>¥{{ item.price }}</p>
+      </ion-label>
+      <div class="quantity-control">
+        <ion-button fill="clear" size="small" (click)="updateQuantity(item, -1)">
+          <ion-icon name="remove-outline"></ion-icon>
+        </ion-button>
+        <span>{{ item.quantity }}</span>
+        <ion-button fill="clear" size="small" (click)="updateQuantity(item, 1)">
+          <ion-icon name="add-outline"></ion-icon>
+        </ion-button>
+        <ion-button fill="clear" size="small" (click)="removeItem(item)" color="danger">
+          <ion-icon name="trash-outline"></ion-icon>
+        </ion-button>
+      </div>
+    </ion-item>
+  </ion-list>
+  
+  <div *ngIf="!isLoading && cartItems.length > 0" class="footer">
+    <div class="total">总计: ¥{{ total.toFixed(2) || '0.00' }}</div>
+    <ion-button expand="full" (click)="checkout()">去结算</ion-button>
+  </div>
+</ion-content>

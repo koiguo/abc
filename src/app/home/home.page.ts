@@ -1,13 +1,15 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { IonicModule, ToastController, ActionSheetController } from '@ionic/angular';
+import { IonicModule, ToastController, ActionSheetController, AlertController } from '@ionic/angular';
 import { register } from 'swiper/element/bundle';
 import { RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { addIcons } from 'ionicons';
+import { NavController } from '@ionic/angular';
 import * as ionIcons from 'ionicons/icons';
+import { AuthService } from '../services/auth.service';
 
 register();
 
@@ -44,13 +46,16 @@ interface Banner {
   styleUrls: ['./home.page.scss'],
   standalone: true,          
   imports: [CommonModule, FormsModule, IonicModule, RouterModule],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 
-export class HomePage implements OnInit {
+export class HomePage implements OnInit, OnDestroy {
   searchText = '';
   hasUnreadMessage = false;
   currentSlideIndex = 0;
+  
+  // 用户头像
+  userAvatar: string = 'https://ionicframework.com/docs/img/demos/avatar.svg';
   
   // 用户已选择的功能按钮
   functionButtons: FunctionButton[] = [];
@@ -73,16 +78,29 @@ export class HomePage implements OnInit {
     private router: Router,
     private toastController: ToastController,
     private http: HttpClient,
-    private actionSheetController: ActionSheetController
+    private actionSheetController: ActionSheetController,
+    private alertController: AlertController,
+    private navController: NavController,
+    private authService: AuthService  // ✅ 添加 AuthService
   ) {}
 
   ngOnInit() {
     console.log('HomePage ngOnInit');
+    
+    // ✅ 监听头像更新事件
+    window.addEventListener('avatar-updated', this.handleAvatarUpdate.bind(this));
+    
     this.checkUnreadMessages();
     this.loadProducts();
     this.loadUserFunctions();
     this.loadAvailableFunctions();
-    this.loadBanners();  // 加载轮播图
+    this.loadBanners();
+    this.loadUserAvatar();  // ✅ 加载用户头像
+  }
+
+  ngOnDestroy() {
+    // ✅ 移除事件监听
+    window.removeEventListener('avatar-updated', this.handleAvatarUpdate.bind(this));
   }
 
   ionViewWillEnter() {
@@ -90,7 +108,26 @@ export class HomePage implements OnInit {
     this.checkUnreadMessages();
     this.loadProducts();
     this.loadUserFunctions();
-    this.loadBanners();  // 刷新轮播图
+    this.loadBanners();
+    this.loadUserAvatar();  // ✅ 每次进入页面刷新头像
+  }
+
+  // ✅ 处理头像更新事件
+  handleAvatarUpdate(event: any) {
+    if (event.detail.avatarUrl) {
+      this.userAvatar = event.detail.avatarUrl;
+      console.log('主页头像已更新:', this.userAvatar);
+    }
+  }
+
+  // ✅ 加载用户头像
+  loadUserAvatar() {
+    const user = this.authService.getCurrentUser();
+    if (user && user.avatar) {
+      this.userAvatar = user.avatar;
+    } else {
+      this.userAvatar = 'https://ionicframework.com/docs/img/demos/avatar.svg';
+    }
   }
 
   // 加载轮播图
@@ -339,6 +376,59 @@ export class HomePage implements OnInit {
     console.log('点击商品:', product.name);
     this.router.navigate(['/product-detail'], {
       queryParams: { product: JSON.stringify(product) }
+    });
+  }
+
+  async addToCart(product: Product) {
+    const userStr = localStorage.getItem('user');
+    if (!userStr) {
+      const alert = await this.alertController.create({
+        header: '提示',
+        message: '请先登录后再添加购物车',
+        buttons: [
+          { text: '取消', role: 'cancel' },
+          { text: '去登录', handler: () => { window.location.href = '/login'; } }
+        ]
+      });
+      await alert.present();
+      return;
+    }
+    
+    const user = JSON.parse(userStr);
+    
+    this.http.post(`${this.apiUrl}/cart/add`, { 
+      user_id: user.id,
+      product_id: product.id, 
+      quantity: 1 
+    }).subscribe({
+      next: async (res: any) => {
+        if (res.success) {
+          const toast = await this.toastController.create({
+            message: `已添加 ${product.name} 到购物车`,
+            duration: 1500,
+            position: 'middle',
+            color: 'dark'
+          });
+          toast.present();
+        } else {
+          const toast = await this.toastController.create({
+            message: res.message || '添加失败',
+            duration: 1500,
+            position: 'middle',
+            color: 'dark'
+          });
+          toast.present();
+        }
+      },
+      error: async () => {
+        const toast = await this.toastController.create({
+          message: '添加失败，请重试',
+          duration: 1500,
+          position: 'middle',
+          color: 'dark'
+        });
+        toast.present();
+      }
     });
   }
 

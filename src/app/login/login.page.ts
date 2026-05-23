@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';  // ✅ 添加 OnInit
+import { Component, OnInit, NgZone } from '@angular/core';  // ✅ 添加 NgZone
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import { ToastController, LoadingController, NavController  } from '@ionic/angular';
+import { ToastController, LoadingController, NavController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
@@ -12,15 +12,15 @@ import { IonicModule } from '@ionic/angular';
   styleUrls: ['./login.page.scss'],
   standalone: true,
   imports: [
-    CommonModule,    // 提供 ngIf, ngFor 等
-    FormsModule,     // 提供 ngModel
-    IonicModule      // ✅ 提供 ion-button, ion-input 等 Ionic 组件
+    CommonModule,
+    FormsModule,
+    IonicModule
   ]
 })
-export class LoginPage implements OnInit {  // ✅ 添加 implements OnInit
+export class LoginPage implements OnInit {
   
   loginData = {
-    account: '',  // 用户名或手机号
+    account: '',
     password: ''
   };
   rememberMe = false;
@@ -30,30 +30,50 @@ export class LoginPage implements OnInit {  // ✅ 添加 implements OnInit
     private router: Router,
     private toastController: ToastController,
     private loadingController: LoadingController,
-    private navController: NavController
+    private navController: NavController,
+    private zone: NgZone  // ✅ 添加 NgZone
   ) {}
 
-  
-  // ✅ 添加 ngOnInit 方法
   ngOnInit() {
     console.log('LoginPage 初始化');
   }
 
+  // ✅ 添加这个方法 - 每次进入页面时触发
+  ionViewWillEnter() {
+    console.log('LoginPage 将要进入');
+    this.zone.run(() => {
+      // 确保页面在 Angular zone 中运行
+      // 强制重新检查
+    });
+  }
+
+  // ✅ 添加这个方法 - 页面完全进入后触发
+  ionViewDidEnter() {
+    console.log('LoginPage 已进入');
+    // 强制重新渲染页面
+    setTimeout(() => {
+      const content = document.querySelector('ion-content');
+      if (content) {
+        content.style.opacity = '0.99';
+        setTimeout(() => {
+          content.style.opacity = '1';
+        }, 50);
+      }
+    }, 50);
+  }
+
   async login() {
-    // 表单验证
     if (!this.loginData.account || !this.loginData.password) {
       this.showToast('请填写完整信息', 'warning');
       return;
     }
 
-    // 显示加载动画
     const loading = await this.loadingController.create({
       message: '登录中...',
       spinner: 'crescent'
     });
     await loading.present();
 
-    // 调用登录API
     this.authService.login(this.loginData.account, this.loginData.password)
       .subscribe({
         next: async (response: any) => {
@@ -67,13 +87,11 @@ export class LoginPage implements OnInit {  // ✅ 添加 implements OnInit
 
             this.showToast('登录成功！', 'success');
             
-            //  根据角色跳转不同页面
+            // ✅ 使用 window.location.href 强制刷新页面
             if (response.data.user.role === 'admin') {
-              console.log('管理员登录，跳转到管理页面');
-              this.router.navigate(['/admin']);
+              window.location.href = '/admin';
             } else {
-              console.log('普通用户登录，跳转到首页');
-              this.router.navigate(['/home']);
+              window.location.href = '/home';
             }
           } else {
             this.showToast(response.message || '登录失败', 'danger');
@@ -101,7 +119,7 @@ export class LoginPage implements OnInit {  // ✅ 添加 implements OnInit
     this.router.navigate(['/register'], { replaceUrl: true });
   }
 
-    goBack() {
+  goBack() {
     console.log('返回按钮被点击');
     this.navController.back();
   }

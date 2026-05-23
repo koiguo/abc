@@ -6,7 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { homeOutline, addCircleOutline, createOutline, trashOutline, cubeOutline, searchOutline, gridOutline } from 'ionicons/icons';
-import { ImageCropperService } from '@bitforgehq/angular-ionic-image-cropper';
+import { CropperService } from '../services/cropper.service';
 
 interface FunctionItem {
   id: number;
@@ -32,7 +32,6 @@ interface Banner {
   styleUrls: ['./admin.page.scss'],
   standalone: true,
   imports: [CommonModule, FormsModule, IonicModule],
-  providers: [ImageCropperService]
 })
 
 export class AdminPage implements OnInit {
@@ -85,7 +84,7 @@ export class AdminPage implements OnInit {
     link_url: '',
     sort_order: 0,
     is_active: true
-};
+  };
 
   private apiUrl = 'https://guoguo.pythonanywhere.com/api';
 
@@ -94,7 +93,7 @@ export class AdminPage implements OnInit {
     private toastController: ToastController,
     private loadingController: LoadingController,
     private router: Router,
-    private imageCropperService: ImageCropperService
+    private cropperService: CropperService
   ) {
     addIcons({ 
       homeOutline, 
@@ -130,140 +129,6 @@ export class AdminPage implements OnInit {
       }
     });
   }
-
-  showAddBannerForm() {
-  this.isEditingBanner = false;
-  this.currentBanner = {
-    id: 0,
-    title: '',
-    image_url: '',
-    link_url: '',
-    sort_order: this.banners.length + 1,
-    is_active: true
-  };
-  this.showBannerForm = true;
-}
-
-editBanner(banner: Banner) {
-  this.isEditingBanner = true;
-  this.currentBanner = { ...banner };
-  this.showBannerForm = true;
-}
-
-async saveBanner() {
-  if (!this.currentBanner.image_url) {
-    this.showToast('请填写图片URL', 'warning');
-    return;
-  }
-  
-  const loading = await this.loadingController.create({ message: '保存中...' });
-  await loading.present();
-  
-  const url = this.isEditingBanner 
-    ? `${this.apiUrl}/admin/banners/${this.currentBanner.id}` 
-    : `${this.apiUrl}/admin/banners/add`;
-  const method = this.isEditingBanner ? 'put' : 'post';
-  
-  this.http[method](url, this.currentBanner).subscribe({
-    next: async (res: any) => {
-      await loading.dismiss();
-      if (res.success) {
-        this.showToast(this.isEditingBanner ? '更新成功' : '添加成功', 'success');
-        this.showBannerForm = false;
-        this.loadBanners();
-      } else {
-        this.showToast(res.message || '操作失败', 'danger');
-      }
-    },
-    error: async () => {
-      await loading.dismiss();
-      this.showToast('操作失败', 'danger');
-    }
-  });
-}
-
-async deleteBanner(id: number) {
-  const loading = await this.loadingController.create({ message: '删除中...' });
-  await loading.present();
-  
-  this.http.delete(`${this.apiUrl}/admin/banners/${id}`).subscribe({
-    next: async (res: any) => {
-      await loading.dismiss();
-      if (res.success) {
-        this.showToast('删除成功', 'success');
-        this.loadBanners();
-      }
-    },
-    error: async () => {
-      await loading.dismiss();
-      this.showToast('删除失败', 'danger');
-    }
-  });
-}
-
-cancelBannerForm() {
-  this.showBannerForm = false;
-}
-loadBanners() {
-  this.isLoadingBanners = true;
-  this.http.get<any>(`${this.apiUrl}/admin/banners`).subscribe({
-    next: (res) => {
-      if (res.success) {
-        this.banners = res.data;
-        console.log('轮播图加载成功:', this.banners);
-      }
-      this.isLoadingBanners = false;
-    },
-    error: () => {
-      this.showToast('加载失败', 'danger');
-      this.isLoadingBanners = false;
-    }
-  });
-}
-
-// 轮播图图片上传
-async uploadBannerImage() {
-  try {
-    const croppedBlob = await this.imageCropperService.takeAndCropPhoto({
-      aspectRatio: 16/9,
-      quality: 0.8,
-      outputFormat: 'image/jpeg',
-      cancelText: '取消',
-      doneText: '完成'
-    });
-    
-    if (croppedBlob) {
-      await this.uploadCroppedBannerImage(croppedBlob);
-    }
-  } catch (error) {
-    console.error('取消或失败:', error);
-  }
-}
-
-async uploadCroppedBannerImage(blob: Blob) {
-  const loading = await this.loadingController.create({ message: '上传中...' });
-  await loading.present();
-  
-  const formData = new FormData();
-  formData.append('image', blob, 'banner_' + Date.now() + '.jpg');
-  
-  this.http.post<{ success: boolean; data: { url: string } }>(`${this.apiUrl}/upload`, formData)
-    .subscribe({
-      next: async (res) => {
-        await loading.dismiss();
-        if (res.success && res.data?.url) {
-          this.currentBanner.image_url = res.data.url;
-          this.showToast('图片上传成功', 'success');
-        } else {
-          this.showToast('上传失败', 'danger');
-        }
-      },
-      error: async () => {
-        await loading.dismiss();
-        this.showToast('上传失败，请重试', 'danger');
-      }
-    });
-}
 
   filterProducts() {
     const keyword = this.searchKeyword.toLowerCase().trim();
@@ -356,12 +221,11 @@ async uploadCroppedBannerImage(blob: Blob) {
   // ========== 图片处理 ==========
   async selectAndCropImage() {
     try {
-      const croppedBlob = await this.imageCropperService.takeAndCropPhoto({
+      const croppedBlob = await this.cropperService.cropImage({
         aspectRatio: 1,
-        quality: 0.9,
-        outputFormat: 'image/jpeg',
-        cancelText: '取消',
-        doneText: '完成'
+        width: 500,
+        height: 500,
+        quality: 0.9
       });
       
       if (croppedBlob) {
@@ -385,14 +249,13 @@ async uploadCroppedBannerImage(blob: Blob) {
     await loading.present();
     
     try {
-      const croppedBlob = await this.imageCropperService.openCropper(
+      const croppedBlob = await this.cropperService.cropExistingImage(
         this.currentProduct.image,
         {
           aspectRatio: 1,
-          quality: 0.7,
-          outputFormat: 'image/jpeg',
-          cancelText: '取消',
-          doneText: '完成'
+          width: 500,
+          height: 500,
+          quality: 0.9
         }
       );
       
@@ -436,6 +299,140 @@ async uploadCroppedBannerImage(blob: Blob) {
           this.showToast('上传失败，请重试', 'danger');
         }
       });
+  }
+
+  // ========== 轮播图管理 ==========
+  loadBanners() {
+    this.isLoadingBanners = true;
+    this.http.get<any>(`${this.apiUrl}/admin/banners`).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.banners = res.data;
+          console.log('轮播图加载成功:', this.banners);
+        }
+        this.isLoadingBanners = false;
+      },
+      error: () => {
+        this.showToast('加载失败', 'danger');
+        this.isLoadingBanners = false;
+      }
+    });
+  }
+
+  showAddBannerForm() {
+    this.isEditingBanner = false;
+    this.currentBanner = {
+      id: 0,
+      title: '',
+      image_url: '',
+      link_url: '',
+      sort_order: this.banners.length + 1,
+      is_active: true
+    };
+    this.showBannerForm = true;
+  }
+
+  editBanner(banner: Banner) {
+    this.isEditingBanner = true;
+    this.currentBanner = { ...banner };
+    this.showBannerForm = true;
+  }
+
+  async uploadBannerImage() {
+    try {
+      const croppedBlob = await this.cropperService.cropImage({
+        aspectRatio: 16/9,
+        width: 1200,
+        height: 675,
+        quality: 0.8
+      });
+      
+      if (croppedBlob) {
+        await this.uploadCroppedBannerImage(croppedBlob);
+      }
+    } catch (error) {
+      console.error('取消或失败:', error);
+    }
+  }
+
+  async uploadCroppedBannerImage(blob: Blob) {
+    const loading = await this.loadingController.create({ message: '上传中...' });
+    await loading.present();
+    
+    const formData = new FormData();
+    formData.append('image', blob, 'banner_' + Date.now() + '.jpg');
+    
+    this.http.post<{ success: boolean; data: { url: string } }>(`${this.apiUrl}/upload`, formData)
+      .subscribe({
+        next: async (res) => {
+          await loading.dismiss();
+          if (res.success && res.data?.url) {
+            this.currentBanner.image_url = res.data.url;
+            this.showToast('图片上传成功', 'success');
+          } else {
+            this.showToast('上传失败', 'danger');
+          }
+        },
+        error: async () => {
+          await loading.dismiss();
+          this.showToast('上传失败，请重试', 'danger');
+        }
+      });
+  }
+
+  async saveBanner() {
+    if (!this.currentBanner.image_url) {
+      this.showToast('请填写图片URL', 'warning');
+      return;
+    }
+    
+    const loading = await this.loadingController.create({ message: '保存中...' });
+    await loading.present();
+    
+    const url = this.isEditingBanner 
+      ? `${this.apiUrl}/admin/banners/${this.currentBanner.id}` 
+      : `${this.apiUrl}/admin/banners/add`;
+    const method = this.isEditingBanner ? 'put' : 'post';
+    
+    this.http[method](url, this.currentBanner).subscribe({
+      next: async (res: any) => {
+        await loading.dismiss();
+        if (res.success) {
+          this.showToast(this.isEditingBanner ? '更新成功' : '添加成功', 'success');
+          this.showBannerForm = false;
+          this.loadBanners();
+        } else {
+          this.showToast(res.message || '操作失败', 'danger');
+        }
+      },
+      error: async () => {
+        await loading.dismiss();
+        this.showToast('操作失败', 'danger');
+      }
+    });
+  }
+
+  async deleteBanner(id: number) {
+    const loading = await this.loadingController.create({ message: '删除中...' });
+    await loading.present();
+    
+    this.http.delete(`${this.apiUrl}/admin/banners/${id}`).subscribe({
+      next: async (res: any) => {
+        await loading.dismiss();
+        if (res.success) {
+          this.showToast('删除成功', 'success');
+          this.loadBanners();
+        }
+      },
+      error: async () => {
+        await loading.dismiss();
+        this.showToast('删除失败', 'danger');
+      }
+    });
+  }
+
+  cancelBannerForm() {
+    this.showBannerForm = false;
   }
 
   // ========== 功能管理 ==========

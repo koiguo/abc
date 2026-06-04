@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { IonicModule, ToastController, ActionSheetController, AlertController } from '@ionic/angular';
 import { register } from 'swiper/element/bundle';
 import { RouterModule } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { addIcons } from 'ionicons';
 import { NavController } from '@ionic/angular';
 import * as ionIcons from 'ionicons/icons';
@@ -63,7 +63,7 @@ export class HomePage implements OnInit, OnDestroy {
   
   // 所有可用功能（管理员添加的）
   availableFunctions: FunctionButton[] = [];
-  maxSelect = 8;  // 最多可选8个
+  maxSelect = 8;
   
   // 轮播图
   banners: Banner[] = [];
@@ -73,7 +73,7 @@ export class HomePage implements OnInit, OnDestroy {
   isLoading = false;
 
   private apiUrl = 'https://guoguo.pythonanywhere.com/api';
-  
+
   constructor(
     private router: Router,
     private toastController: ToastController,
@@ -81,38 +81,50 @@ export class HomePage implements OnInit, OnDestroy {
     private actionSheetController: ActionSheetController,
     private alertController: AlertController,
     private navController: NavController,
-    private authService: AuthService  // ✅ 添加 AuthService
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
     console.log('HomePage ngOnInit');
     
-    // ✅ 监听头像更新事件
     window.addEventListener('avatar-updated', this.handleAvatarUpdate.bind(this));
     
+    // 先显示缓存数据（无加载动画）
+    this.loadCachedData();
+    
+    // 后台静默更新（不显示加载动画）
+    this.loadBannersSilent();
+    this.loadUserFunctionsSilent();
+    this.loadProductsSilent();
+    this.loadAvailableFunctionsSilent();
+    
     this.checkUnreadMessages();
-    this.loadProducts();
-    this.loadUserFunctions();
-    this.loadAvailableFunctions();
-    this.loadBanners();
-    this.loadUserAvatar();  // ✅ 加载用户头像
+    this.loadUserAvatar();
   }
 
   ngOnDestroy() {
-    // ✅ 移除事件监听
     window.removeEventListener('avatar-updated', this.handleAvatarUpdate.bind(this));
   }
 
   ionViewWillEnter() {
     console.log('HomePage ionViewWillEnter');
     this.checkUnreadMessages();
-    this.loadProducts();
-    this.loadUserFunctions();
-    this.loadBanners();
-    this.loadUserAvatar();  // ✅ 每次进入页面刷新头像
+    this.loadUserAvatar();
+    // 每次进入时静默刷新
+    this.loadBannersSilent();
+    this.loadUserFunctionsSilent();
+    this.loadProductsSilent();
   }
 
-  // ✅ 处理头像更新事件
+  // 获取请求头
+  private getHeaders(): HttpHeaders {
+    const token = localStorage.getItem('auth_token');
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+  }
+
   handleAvatarUpdate(event: any) {
     if (event.detail.avatarUrl) {
       this.userAvatar = event.detail.avatarUrl;
@@ -120,7 +132,6 @@ export class HomePage implements OnInit, OnDestroy {
     }
   }
 
-  // ✅ 加载用户头像
   loadUserAvatar() {
     const user = this.authService.getCurrentUser();
     if (user && user.avatar) {
@@ -130,57 +141,83 @@ export class HomePage implements OnInit, OnDestroy {
     }
   }
 
-  // 加载轮播图
-  loadBanners() {
-    this.isLoadingBanners = true;
+  // ========== 缓存加载（无动画） ==========
+  loadCachedData() {
+    // 缓存轮播图
+    const cachedBanners = localStorage.getItem('cachedBanners');
+    if (cachedBanners) {
+      this.banners = JSON.parse(cachedBanners);
+      console.log('使用缓存轮播图');
+    }
+    
+    // 缓存功能按钮
+    const cachedFunctions = localStorage.getItem('cachedUserFunctions');
+    if (cachedFunctions) {
+      this.functionButtons = JSON.parse(cachedFunctions);
+      this.registerIcons();
+      console.log('使用缓存功能按钮');
+    }
+    
+    // 缓存商品
+    const cachedProducts = localStorage.getItem('cachedProducts');
+    if (cachedProducts) {
+      this.products = JSON.parse(cachedProducts);
+      console.log('使用缓存商品');
+    }
+  }
+
+  // ========== 静默加载（无加载动画） ==========
+  loadBannersSilent() {
     this.http.get<{ success: boolean; data: Banner[] }>(`${this.apiUrl}/banners`)
       .subscribe({
         next: (response) => {
           if (response.success && response.data) {
             this.banners = response.data;
-            console.log('轮播图加载成功:', this.banners);
+            localStorage.setItem('cachedBanners', JSON.stringify(this.banners));
+            console.log('轮播图静默更新成功');
           }
-          this.isLoadingBanners = false;
         },
         error: (error) => {
           console.error('轮播图加载失败:', error);
-          this.isLoadingBanners = false;
         }
       });
   }
 
-  // 加载用户已选择的功能
-  loadUserFunctions() {
-    this.isLoadingFunctions = true;
-    this.http.get<{ success: boolean; data: FunctionButton[] }>(`${this.apiUrl}/user/selected-functions`)
-      .subscribe({
-        next: (response) => {
-          if (response.success && response.data) {
-            this.functionButtons = response.data;
-            this.registerIcons();
-            console.log('用户功能加载成功:', this.functionButtons);
-          } else {
-            // 如果没有数据，尝试加载默认功能
-            this.loadDefaultFunctions();
-          }
-          this.isLoadingFunctions = false;
-        },
-        error: (error) => {
-          console.error('功能加载失败:', error);
-          this.loadDefaultFunctions();
-          this.isLoadingFunctions = false;
+  loadUserFunctionsSilent() {
+    this.http.get<{ success: boolean; data: FunctionButton[] }>(`${this.apiUrl}/user/selected-functions`, {
+      headers: this.getHeaders()
+    }).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.functionButtons = response.data;
+          this.registerIcons();
+          localStorage.setItem('cachedUserFunctions', JSON.stringify(this.functionButtons));
+          console.log('用户功能静默更新成功');
+        } else {
+          this.loadDefaultFunctionsSilent();
         }
-      });
+      },
+      error: (error) => {
+        console.error('功能加载失败:', error);
+        const stored = localStorage.getItem('cachedUserFunctions');
+        if (stored && this.functionButtons.length === 0) {
+          this.functionButtons = JSON.parse(stored);
+          this.registerIcons();
+        } else {
+          this.loadDefaultFunctionsSilent();
+        }
+      }
+    });
   }
 
-  // 加载默认功能（备用）
-  loadDefaultFunctions() {
+  loadDefaultFunctionsSilent() {
     this.http.get<{ success: boolean; data: FunctionButton[] }>(`${this.apiUrl}/functions`)
       .subscribe({
         next: (response) => {
           if (response.success && response.data) {
             this.functionButtons = response.data.slice(0, this.maxSelect);
             this.registerIcons();
+            localStorage.setItem('cachedUserFunctions', JSON.stringify(this.functionButtons));
           }
         },
         error: (err) => {
@@ -189,23 +226,60 @@ export class HomePage implements OnInit, OnDestroy {
       });
   }
 
-  // 加载所有可用功能（管理员添加的）
-  loadAvailableFunctions() {
-    this.http.get<{ success: boolean; data: FunctionButton[] }>(`${this.apiUrl}/functions/available`)
+  loadAvailableFunctionsSilent() {
+    this.http.get<{ success: boolean; data: FunctionButton[] }>(`${this.apiUrl}/functions/available`, {
+      headers: this.getHeaders()
+    }).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.availableFunctions = response.data;
+          console.log('可用功能静默更新成功');
+        }
+      },
+      error: (error) => {
+        console.error('可用功能加载失败:', error);
+      }
+    });
+  }
+
+  loadProductsSilent() {
+    this.http.get<{ success: boolean; data: Product[] }>(`${this.apiUrl}/products`)
       .subscribe({
         next: (response) => {
           if (response.success && response.data) {
-            this.availableFunctions = response.data;
-            console.log('可用功能加载成功:', this.availableFunctions);
+            this.products = response.data;
+            localStorage.setItem('cachedProducts', JSON.stringify(this.products));
+            console.log('商品静默更新成功');
           }
         },
         error: (error) => {
-          console.error('可用功能加载失败:', error);
+          console.error('商品加载失败:', error);
         }
       });
   }
 
-  // 动态注册图标
+  // ========== 保存用户功能到服务器 ==========
+  saveUserFunctions() {
+    const functionIds = this.functionButtons.map(f => f.id);
+    
+    this.http.post(`${this.apiUrl}/user/selected-functions`, 
+      { function_ids: functionIds },
+      { headers: this.getHeaders() }
+    ).subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          console.log('功能保存成功');
+          localStorage.setItem('cachedUserFunctions', JSON.stringify(this.functionButtons));
+        } else {
+          console.error('保存失败:', res.message);
+        }
+      },
+      error: (error) => {
+        console.error('保存失败:', error);
+      }
+    });
+  }
+
   registerIcons() {
     const iconsToRegister: { [key: string]: any } = {};
     
@@ -268,10 +342,12 @@ export class HomePage implements OnInit, OnDestroy {
       return;
     }
     
-    this.functionButtons.push(func);
-    this.saveUserFunctions();
-    this.registerIcons();
-    this.showToast(`已添加 ${func.name}`, 'success');
+    if (!this.functionButtons.find(f => f.id === func.id)) {
+      this.functionButtons.push(func);
+      this.saveUserFunctions();
+      this.registerIcons();
+      this.showToast(`已添加 ${func.name}`, 'success');
+    }
   }
 
   // 删除功能
@@ -283,45 +359,6 @@ export class HomePage implements OnInit, OnDestroy {
       this.saveUserFunctions();
       this.showToast(`已移除 ${func.name}`, 'success');
     }
-  }
-
-  // 保存用户功能到服务器
-  saveUserFunctions() {
-    const functionIds = this.functionButtons.map(f => f.id);
-    
-    this.http.post(`${this.apiUrl}/user/selected-functions`, { function_ids: functionIds })
-      .subscribe({
-        next: (res: any) => {
-          if (!res.success) {
-            console.error('保存失败:', res.message);
-          }
-        },
-        error: (error) => {
-          console.error('保存失败:', error);
-        }
-      });
-  }
-
-  loadProducts() {
-    this.isLoading = true;
-    this.http.get<{ success: boolean; data: Product[] }>(`${this.apiUrl}/products`)
-      .subscribe({
-        next: (response) => {
-          if (response.success && response.data) {
-            this.products = response.data;
-            console.log('商品加载成功:', this.products);
-          } else {
-            console.error('商品加载失败:', response);
-            this.showToast('商品加载失败', 'danger');
-          }
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('网络错误:', error);
-          this.showToast('网络错误，请稍后重试', 'danger');
-          this.isLoading = false;
-        }
-      });
   }
 
   async showToast(message: string, color: string = 'primary') {

@@ -16,21 +16,30 @@
 <ion-content>
   <!-- 用户信息卡片 -->
   <ion-card>
-    <ion-card-content style="display: flex; align-items: center; justify-content: space-between;">
-      <div style="display: flex; align-items: center; gap: 16px;">
-        <!-- 头像 - 点击修改头像 -->
-        <ion-avatar style="width: 60px; height: 60px; cursor: pointer;" (click)="changeAvatar()">
-          <img [src]="avatar">
-        </ion-avatar>
-        <div>
-          <!-- 用户名区域 - 点击查看个人资料 -->
-          <h2 style="cursor: pointer;" (click)="showProfile()">{{ username || '用户' }}</h2>
-          <p>{{ email || '暂无邮箱' }}</p>
-          <p style="font-size: 12px; color: #999;">{{ phone || '未绑定手机' }}</p>
+    <ion-card-content>
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 16px; flex: 1;">
+          <!-- 头像 -->
+          <div class="avatar-section" (click)="goToUserDetail()">
+            <ion-avatar class="user-avatar">
+              <img [src]="user.avatar || 'https://ionicframework.com/docs/img/demos/avatar.svg'" alt="avatar">
+            </ion-avatar>
+            <div class="avatar-edit-icon">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </div>
+          </div>
+          
+          <!-- ✅ 用户信息：昵称 + 个人简介 -->
+          <div class="user-info">
+            <h2 class="user-name">{{ user.name || username || '点击头像登录' }}</h2>
+            <p class="user-bio">{{ user.bio || bio || '这个人很懒，什么都没写' }}</p>
+          </div>
         </div>
+        
+        <!-- 二维码图标 -->
+        <ion-icon name="qr-code-outline" style="font-size: 32px; cursor: pointer;" (click)="showQRCode()">
+        </ion-icon>
       </div>
-      <ion-icon name="qr-code-outline" style="font-size: 32px; cursor: pointer;" (click)="showQRCode()">
-      </ion-icon>
     </ion-card-content>
   </ion-card>
 
@@ -43,7 +52,6 @@
             <ion-icon [name]="func.icon"></ion-icon>
           </div>
           <ion-label>{{ func.name }}</ion-label>
-          <!-- 购物车角标 -->
           <ion-badge *ngIf="func.name === '购物车' && cartCount > 0" class="cart-badge">
             {{ cartCount }}
           </ion-badge>

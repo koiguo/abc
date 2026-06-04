@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
@@ -13,11 +13,21 @@ import { ChatModalComponent } from '../components/chat-modal/chat-modal.componen
   standalone: true,
   imports: [CommonModule, IonicModule, FormsModule],
 })
-export class MessagesPage implements OnInit {
+export class MessagesPage implements OnInit, OnDestroy {
   searchTerm: string = '';
   messages: any[] = [];
   filteredMessages: any[] = [];
+  pendingRequestCount: number = 0;
+  totalUnreadCount: number = 0;
+  isLoading: boolean = true;
+  isRefreshing: boolean = false;
+  isError: boolean = false;
+  isLoggedIn: boolean = true;
   private apiUrl = 'https://guoguo.pythonanywhere.com/api';
+  
+  private pollingInterval: any;
+  private isPageActive: boolean = true;
+  private isUpdating: boolean = false;
 
   constructor(
     private toastController: ToastController,
@@ -26,16 +36,228 @@ export class MessagesPage implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.messages = [
-      { id: 1, user_id: 2, name: '产品', lastMessage: '加入我们的会员', unread: 8, avatar: 'https://ionicframework.com/docs/img/demos/avatar.svg' },
-      { id: 2, user_id: 3, name: '小果', lastMessage: '东西已送达！', unread: 0, avatar: 'https://ionicframework.com/docs/img/demos/avatar.svg' },
-      { id: 3, user_id: 4, name: '产品群', lastMessage: '晚上我们有优惠活动哦', unread: 15, avatar: 'https://ionicframework.com/docs/img/demos/avatar.svg' }
-    ];
-    this.filteredMessages = [...this.messages];
-    this.saveUnreadCount();
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      this.isLoggedIn = false;
+      this.isLoading = false;
+      return;
+    }
+    this.isLoggedIn = true;
+
+    this.loadContactsFromApi(false);
+    this.loadPendingRequestCount(false);
+    this.startSmartPolling();
   }
 
-  // 获取请求头
+  goToLogin() {
+    window.location.href = '/login';
+  }
+
+  ngOnDestroy() {
+    this.stopPolling();
+  }
+
+  @HostListener('document:visibilitychange', [])
+  onVisibilityChange() {
+    this.isPageActive = !document.hidden;
+    this.restartPolling();
+  }
+
+  @HostListener('window:focus', [])
+  onWindowFocus() {
+    this.isPageActive = true;
+    this.restartPolling();
+    this.refreshAll();
+  }
+
+  @HostListener('window:blur', [])
+  onWindowBlur() {
+    this.isPageActive = false;
+    this.restartPolling();
+  }
+
+  startSmartPolling() {
+    this.adjustPollingRate();
+  }
+
+  adjustPollingRate() {
+    this.stopPolling();
+    
+    let interval = 5000;
+    
+    if (this.isPageActive && !document.hidden) {
+      interval = 3000;
+    } else {
+      interval = 15000;
+    }
+    
+    this.pollingInterval = setInterval(() => {
+      this.refreshAll();
+    }, interval);
+  }
+
+  restartPolling() {
+    this.adjustPollingRate();
+  }
+
+  stopPolling() {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
+    }
+  }
+
+  refreshAll() {
+    this.loadContactsFromApi(true);
+    this.loadPendingRequestCount(true);
+  }
+
+  loadPendingRequestCount(silent: boolean = false) {
+    this.http.get(`${this.apiUrl}/contact-requests/pending-count`, {
+      headers: this.getHeaders()
+    }).subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.pendingRequestCount = res.count || 0;
+          localStorage.setItem('pendingRequestCount', this.pendingRequestCount.toString());
+          this.updateTotalBadge();
+        }
+      },
+      error: (err) => {
+        console.error('加载申请数量失败', err);
+        if (!silent) {
+          this.pendingRequestCount = 0;
+        }
+      }
+    });
+  }
+
+  // ✅ 格式化最后一条消息的显示内容
+  private formatLastMessage(contact: any): string {
+    const lastMessage = contact.last_message || '';
+    const lastMessageType = contact.last_message_type || 'text';
+    const duration = contact.last_message_duration || 0;
+    
+    if (lastMessageType === 'image') {
+      return '[图片]';
+    } else if (lastMessageType === 'audio') {
+      return `[语音 ${duration}'']`;
+    } else {
+      return lastMessage;
+    }
+  }
+
+  // 加载联系人
+  loadContactsFromApi(silent: boolean = false) {
+    if (this.isUpdating) return;
+    
+    this.isUpdating = true;
+    
+    if (!silent) {
+      this.isLoading = true;
+    }
+    this.isError = false;
+    
+    this.http.get(`${this.apiUrl}/contacts`, {
+      headers: this.getHeaders()
+    }).subscribe({
+      next: (res: any) => {
+        this.isUpdating = false;
+        
+        if (!silent) {
+          this.isLoading = false;
+        }
+        
+        if (res.success && res.data) {
+          // ✅ 处理每条消息的显示格式
+          const newMessages = res.data.map((contact: any) => ({
+            id: contact.id,
+            user_id: contact.user_id,
+            name: contact.remark_name || contact.name,
+            lastMessage: this.formatLastMessage(contact),
+            unread: contact.unread || 0,
+            avatar: contact.avatar || 'https://ionicframework.com/docs/img/demos/avatar.svg',
+            last_message_time: contact.last_message_time,
+            // 保存原始消息用于其他用途
+            raw_last_message: contact.last_message,
+            last_message_type: contact.last_message_type
+          }));
+          
+          this.mergeMessages(newMessages);
+          this.saveUnreadCount();
+          this.updateTotalBadge();
+        } else {
+          if (res.data && res.data.length === 0) {
+            this.messages = [];
+            this.filteredMessages = [];
+          }
+        }
+      },
+      error: (err) => {
+        console.error('加载联系人失败', err);
+        this.isUpdating = false;
+        if (!silent) {
+          this.isLoading = false;
+          this.isError = true;
+        }
+      }
+    });
+  }
+
+  // 增量合并消息
+  private mergeMessages(newMessages: any[]) {
+    let hasChanges = false;
+    const existingMap = new Map(this.messages.map(m => [m.user_id, m]));
+    
+    for (const newMsg of newMessages) {
+      const existing = existingMap.get(newMsg.user_id);
+      if (existing) {
+        if (newMsg.unread > existing.unread) {
+          hasChanges = true;
+          existing.unread = newMsg.unread;
+          console.log(`[未读更新] ${existing.name}: ${existing.unread} -> ${newMsg.unread}`);
+        }
+        
+        // 更新其他字段
+        existing.lastMessage = newMsg.lastMessage;
+        existing.last_message_time = newMsg.last_message_time;
+        existing.name = newMsg.name;
+        existing.avatar = newMsg.avatar;
+      } else {
+        hasChanges = true;
+        this.messages.push(newMsg);
+        existingMap.set(newMsg.user_id, newMsg);
+      }
+    }
+    
+    const newUserIds = new Set(newMessages.map(m => m.user_id));
+    const removedCount = this.messages.filter(m => !newUserIds.has(m.user_id)).length;
+    if (removedCount > 0) hasChanges = true;
+    this.messages = this.messages.filter(m => newUserIds.has(m.user_id));
+    
+    this.messages.sort((a, b) => {
+      const timeA = a.last_message_time ? new Date(a.last_message_time).getTime() : 0;
+      const timeB = b.last_message_time ? new Date(b.last_message_time).getTime() : 0;
+      return timeB - timeA;
+    });
+    
+    this.filterMessages();
+    
+    if (hasChanges) {
+      this.saveUnreadCount();
+      this.updateTotalBadge();
+    }
+  }
+
+  updateTotalBadge() {
+    const totalUnread = this.messages.reduce((total, msg) => total + (msg.unread || 0), 0);
+    this.totalUnreadCount = totalUnread + this.pendingRequestCount;
+    localStorage.setItem('totalUnreadCount', this.totalUnreadCount.toString());
+    window.dispatchEvent(new CustomEvent('unreadCountUpdated', { 
+      detail: { unreadCount: this.totalUnreadCount } 
+    }));
+  }
+
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('auth_token');
     return new HttpHeaders({
@@ -44,7 +266,6 @@ export class MessagesPage implements OnInit {
     });
   }
 
-  // 标记消息为已读
   markMessagesAsRead(userId: number) {
     this.http.post(`${this.apiUrl}/messages/mark-read`, {
       targetUserId: userId
@@ -60,54 +281,66 @@ export class MessagesPage implements OnInit {
     });
   }
 
-  // 打开聊天对话框
   async openChat(userId: number, userName: string) {
-    // 先标记已读
     this.markMessagesAsRead(userId);
     
-    // 更新前端未读数
     const message = this.messages.find(m => m.user_id === userId);
     if (message && message.unread > 0) {
       message.unread = 0;
       this.filterMessages();
       this.saveUnreadCount();
+      this.updateTotalBadge();
     }
+
+    const userAvatar = message?.avatar || 'https://ionicframework.com/docs/img/demos/avatar.svg';
     
-    // 打开聊天对话框
+    const tabBar = document.querySelector('ion-tab-bar');
+    if (tabBar) {
+      tabBar.style.display = 'none';
+    }
+   
     const modal = await this.modalController.create({
       component: ChatModalComponent,
       componentProps: {
         targetUserId: userId,
-        targetUserName: userName
-      }
+        targetUserName: userName,
+        targetUserAvatar: userAvatar
+      },
+      cssClass: 'chat-modal-fullscreen'
     });
+    
+    modal.onDidDismiss().then(() => {
+      if (tabBar) {
+        tabBar.style.display = '';
+      }
+      this.refreshAll();
+    });
+    
     await modal.present();
   }
 
-  // 计算并保存未读消息数量
   saveUnreadCount() {
-    const totalUnread = this.messages.reduce((total, msg) => total + msg.unread, 0);
+    const totalUnread = this.messages.reduce((total, msg) => total + (msg.unread || 0), 0);
     localStorage.setItem('unreadCount', totalUnread.toString());
   }
 
-  // 搜索过滤逻辑
   filterMessages() {
     const term = this.searchTerm.trim().toLowerCase();
     if (term === '') {
       this.filteredMessages = [...this.messages];
     } else {
       this.filteredMessages = this.messages.filter(msg => 
-        msg.name.toLowerCase().includes(term) || 
-        msg.lastMessage.toLowerCase().includes(term)
+        (msg.name && msg.name.toLowerCase().includes(term)) || 
+        (msg.lastMessage && msg.lastMessage.toLowerCase().includes(term))
       );
     }
   }
 
-  // 一键清扫未读
   async clearAllMessages() {
     this.messages.forEach(msg => msg.unread = 0);
     this.filterMessages();
     localStorage.setItem('unreadCount', '0');
+    this.updateTotalBadge();
     window.dispatchEvent(new CustomEvent('messagesCleared'));
     
     const toast = await this.toastController.create({
@@ -119,13 +352,63 @@ export class MessagesPage implements OnInit {
     toast.present();
   }
 
-  // 打开通讯录页
-  openContacts() {
-    console.log('打开通讯录');
+  async openContacts() {
+    try {
+      const { AddContactModalComponent } = await import('../components/add-contact-modal/add-contact-modal.component');
+      
+      const modal = await this.modalController.create({
+        component: AddContactModalComponent,
+        componentProps: {}
+      });
+      
+      modal.onDidDismiss().then((result) => {
+        if (result.data && result.data.action === 'chat') {
+          this.openChat(result.data.userId, result.data.userName);
+        } else if (result.data && result.data.action === 'refresh') {
+          this.refreshAll();
+        }
+        this.updateTotalBadge();
+      });
+      
+      await modal.present();
+    } catch (error) {
+      console.error('加载联系人组件失败', error);
+      const toast = await this.toastController.create({
+        message: '通讯录功能开发中...',
+        duration: 1500,
+        position: 'bottom'
+      });
+      toast.present();
+    }
   }
 
-  // 添加新聊天
-  addNewChat() {
-    console.log('添加新聊天');
+  async addNewChat() {
+    try {
+      const { AddContactModalComponent } = await import('../components/add-contact-modal/add-contact-modal.component');
+      
+      const modal = await this.modalController.create({
+        component: AddContactModalComponent,
+        componentProps: {}
+      });
+      
+      modal.onDidDismiss().then((result) => {
+        if (result.data && result.data.action === 'chat') {
+          this.openChat(result.data.userId, result.data.userName);
+        } else if (result.data && result.data.action === 'refresh') {
+          this.refreshAll();
+        }
+        this.updateTotalBadge();
+      });
+      
+      await modal.present();
+    } catch (error) {
+      console.error('加载联系人组件失败', error);
+      const toast = await this.toastController.create({
+        message: '添加联系人功能开发中...',
+        duration: 1500,
+        position: 'bottom'
+      });
+      toast.present();
+    }
   }
 }

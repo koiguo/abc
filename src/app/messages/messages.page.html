@@ -1,7 +1,6 @@
 <!-- 消息页面 HTML -->
 <ion-header>
   <ion-toolbar>
-    <!-- 左侧：一键清扫按钮 -->
     <ion-buttons slot="start">
       <ion-button (click)="clearAllMessages()">
         <ion-icon name="trash-outline"></ion-icon>
@@ -9,14 +8,13 @@
       </ion-button>
     </ion-buttons>
 
-    <!-- 中间：标题 "信息" 居中 -->
     <ion-title class="center-title">信息</ion-title>
 
-    <!-- 右侧：通讯录 + 添加 -->
     <ion-buttons slot="end">
-      <ion-button (click)="openContacts()">
+      <ion-button (click)="openContacts()" class="relative-pos">
         <ion-icon name="people-outline"></ion-icon>
         <span class="button-label">通讯录</span>
+        <span *ngIf="pendingRequestCount > 0" class="red-dot"></span>
       </ion-button>
       <ion-button (click)="addNewChat()">
         <ion-icon name="add-outline"></ion-icon>
@@ -26,7 +24,6 @@
   </ion-toolbar>
 </ion-header>
 
-<!-- 搜索框独立放在 header 下方，占满一整条 -->
 <ion-toolbar class="search-toolbar">
   <ion-searchbar 
     [(ngModel)]="searchTerm" 
@@ -37,33 +34,70 @@
 </ion-toolbar>
 
 <ion-content class="ion-padding">
-  <!-- 无消息提示 -->
-  <div *ngIf="filteredMessages.length === 0" class="empty-state">
-    <ion-icon name="chatbubbles-outline" size="large"></ion-icon>
-    <p>暂无消息</p>
-  </div>
 
- <!-- 消息列表 -->
-<ion-list *ngIf="filteredMessages.length > 0" class="messages-list">
-  <!-- ✅ 只在这一行添加 (click) 事件，其他内容完全不变 -->
-  <ion-item *ngFor="let message of filteredMessages" class="message-item" (click)="openChat(message.user_id, message.name)">
-    
-    <ion-avatar slot="start" class="message-avatar">
-      <img [src]="message.avatar" alt="avatar">
-    </ion-avatar>
+  <!-- ✅ 未登录状态（优先显示，不显示其他状态） -->
+  <div *ngIf="!isLoggedIn" class="empty-state">
+  <ion-icon name="chatbubbles-outline"></ion-icon>
+  <p>快去登录开始聊天</p>
+  <ion-button 
+    (click)="goToLogin()" 
+    class="login-btn"
+    expand="block"
+    shape="round">
+    立即登录
+  </ion-button>
+</div>
 
-    <ion-label>
-      <h2>{{ message.name }}</h2>
-      <p>{{ message.lastMessage }}</p>
-    </ion-label>
+  <!-- ✅ 已登录时才显示其他状态 -->
+  <ng-container *ngIf="isLoggedIn">
+    <!-- 加载中 -->
+    <div *ngIf="isLoading" class="loading-state">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>加载中...</p>
+    </div>
 
-    <ion-badge slot="end" *ngIf="message.unread > 0" color="danger">
-      {{ message.unread }}
-    </ion-badge>
-  </ion-item>
-  
-  <!-- 到底提示 -->
-  <div class="end-tip">
-    <ion-text color="medium">—— 到底咯！ ——</ion-text>
-  </div>
-</ion-list>
+    <!-- 网络错误 -->
+    <div *ngIf="!isLoading && isError" class="empty-state">
+      <ion-icon name="wifi-outline"></ion-icon>
+      <p>晕，网络出错了</p>
+      <ion-button (click)="loadContactsFromApi()" size="small" fill="outline">
+        <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        点击重试
+      </ion-button>
+    </div>
+
+    <!-- 无联系人（API成功但无数据） -->
+    <div *ngIf="!isLoading && !isError && filteredMessages.length === 0" class="empty-state">
+      <ion-icon name="chatbubbles-outline"></ion-icon>
+      <p>快去添加好友来开启聊天吧！</p>
+      <ion-button (click)="addNewChat()" size="small" fill="outline">
+        <ion-icon name="person-add-outline" slot="start"></ion-icon>
+        添加好友
+      </ion-button>
+    </div>
+
+    <!-- 消息列表 -->
+    <ion-list *ngIf="!isLoading && !isError && filteredMessages.length > 0" class="messages-list">
+      <ion-item *ngFor="let message of filteredMessages" class="message-item" (click)="openChat(message.user_id, message.name)">
+        
+        <ion-avatar slot="start" class="message-avatar">
+          <img [src]="message.avatar" alt="avatar">
+        </ion-avatar>
+
+        <ion-label>
+          <h2>{{ message.name }}</h2>
+          <p>{{ message.lastMessage }}</p>
+        </ion-label>
+
+        <ion-badge slot="end" *ngIf="message.unread > 0" color="danger">
+          {{ message.unread }}
+        </ion-badge>
+      </ion-item>
+      
+      <div class="end-tip">
+        <ion-text color="medium">—— 到底咯！ ——</ion-text>
+      </div>
+    </ion-list>
+  </ng-container>
+
+</ion-content>

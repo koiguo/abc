@@ -1,0 +1,170 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="dismiss()">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>通讯录</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- 搜索框 -->
+  <ion-toolbar class="search-toolbar">
+    <ion-searchbar 
+      [(ngModel)]="searchKeyword" 
+      (ionInput)="searchUser()"
+      placeholder="搜索手机号或昵称"
+      animated>
+    </ion-searchbar>
+  </ion-toolbar>
+
+  <!-- Tab 切换 -->
+  <ion-segment [(ngModel)]="activeTab" (ionChange)="onTabChange($event)">
+    <ion-segment-button value="contacts">
+      <ion-label>联系人</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="received">
+      <ion-label>
+        好友申请
+        <ion-badge *ngIf="receivedRequests.length > 0" color="danger">{{ receivedRequests.length }}</ion-badge>
+      </ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="sent">
+      <ion-label>已发送</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+
+  <!-- 搜索结果 -->
+  <div *ngIf="searchResult" class="search-result">
+    <ion-card>
+      <ion-card-content>
+        <div class="user-info">
+          <ion-avatar>
+            <img [src]="searchResult.avatar || 'https://ionicframework.com/docs/img/demos/avatar.svg'" alt="avatar">
+          </ion-avatar>
+          <div class="user-details">
+            <h3>{{ searchResult.name }}</h3>
+            <p>ID: {{ searchResult.id }}</p>
+            <p *ngIf="searchResult.phone">电话: {{ searchResult.phone }}</p>
+          </div>
+          <ion-button 
+            (click)="addContact(searchResult)" 
+            [disabled]="isAlreadyContact(searchResult.id) || hasPendingRequest(searchResult.id)"
+            color="primary" size="small">
+            {{ getButtonText(searchResult.id) }}
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- ========== 我的联系人 ========== -->
+  <div *ngIf="activeTab === 'contacts'">
+    <ion-list-header>
+      <ion-label>我的联系人 ({{ contacts.length }})</ion-label>
+    </ion-list-header>
+
+    <ion-item *ngFor="let contact of contacts" class="contact-item">
+      <ion-avatar slot="start">
+        <img [src]="contact.avatar || 'https://ionicframework.com/docs/img/demos/avatar.svg'" alt="avatar">
+      </ion-avatar>
+      <ion-label>
+        <h2>{{ contact.remark_name || contact.name }}</h2>
+        <p>ID: {{ contact.user_id || contact.contact_id }}</p>
+      </ion-label>
+      <ion-buttons slot="end">
+        <ion-button (click)="startChat(contact)" color="primary">
+          <ion-icon name="chatbubble-outline"></ion-icon>
+        </ion-button>
+        <ion-button (click)="deleteContact(contact)" color="danger">
+          <ion-icon name="trash-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-item>
+
+    <div *ngIf="contacts.length === 0" class="empty-state">
+      <ion-icon name="people-outline"></ion-icon>
+      <p>暂无联系人</p>
+      <p class="hint">搜索上方添加联系人</p>
+    </div>
+  </div>
+
+  <!-- ========== 收到的申请（带左滑删除） ========== -->
+  <div *ngIf="activeTab === 'received'">
+    <ion-list-header>
+      <ion-label>好友申请 ({{ receivedRequests.length }})</ion-label>
+    </ion-list-header>
+
+    <ion-item-sliding *ngFor="let req of receivedRequests">
+      <ion-item class="request-item">
+        <ion-avatar slot="start">
+          <img [src]="req.from_user_avatar || 'https://ionicframework.com/docs/img/demos/avatar.svg'" alt="avatar">
+        </ion-avatar>
+        <ion-label>
+          <h2>{{ req.from_user_name }}</h2>
+          <p class="request-message">{{ req.message || '想加您为好友' }}</p>
+          <p class="request-time">{{ req.created_at | date:'yyyy-MM-dd HH:mm' }}</p>
+        </ion-label>
+        <ion-buttons slot="end">
+          <ion-button (click)="handleRequest(req.id, 'accept')" color="success" size="small">
+            <ion-icon name="checkmark-outline"></ion-icon>
+          </ion-button>
+          <ion-button (click)="handleRequest(req.id, 'reject')" color="danger" size="small">
+            <ion-icon name="close-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-item>
+      
+      <!-- ✅ 收到的申请也可以左滑删除（等同于拒绝） -->
+      <ion-item-options side="end">
+        <ion-item-option color="danger" (click)="rejectRequest(req)">
+          <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+          <span>拒绝</span>
+        </ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+
+    <div *ngIf="receivedRequests.length === 0" class="empty-state">
+      <ion-icon name="person-add-outline"></ion-icon>
+      <p>暂无好友申请</p>
+    </div>
+  </div>
+
+  <!-- ========== 发出的申请（所有状态都可左滑删除） ========== -->
+  <div *ngIf="activeTab === 'sent'">
+    <ion-list-header>
+      <ion-label>发出的申请 ({{ sentRequests.length }})</ion-label>
+    </ion-list-header>
+
+    <ion-item-sliding *ngFor="let req of sentRequests">
+      <ion-item class="request-item">
+        <ion-avatar slot="start">
+          <img [src]="req.to_user_avatar || 'https://ionicframework.com/docs/img/demos/avatar.svg'" alt="avatar">
+        </ion-avatar>
+        <ion-label>
+          <h2>{{ req.to_user_name }}</h2>
+          <p class="request-message">{{ req.message || '申请成为好友' }}</p>
+          <p class="request-time">{{ req.created_at | date:'yyyy-MM-dd HH:mm' }}</p>
+        </ion-label>
+        <ion-badge slot="end" [color]="getStatusColor(req.status)">
+          {{ getStatusText(req.status) }}
+        </ion-badge>
+      </ion-item>
+      
+      <!-- ✅ 所有状态都可左滑删除 -->
+      <ion-item-options side="end">
+        <ion-item-option color="danger" (click)="deleteSentRequest(req)">
+          <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+          <span>删除</span>
+        </ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+
+    <div *ngIf="sentRequests.length === 0" class="empty-state">
+      <ion-icon name="send-outline"></ion-icon>
+      <p>暂无发出的申请</p>
+    </div>
+  </div>
+</ion-content>

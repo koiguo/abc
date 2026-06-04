@@ -1,16 +1,13 @@
 <ion-header>
   <ion-toolbar>
-    <!-- 最左边：返回按钮 -->
     <ion-buttons slot="start">
       <ion-button (click)="dismiss()">
         <ion-icon name="arrow-back-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
 
-    <!-- 正中间：用户昵称 -->
     <ion-title>{{ targetUserName }}</ion-title>
 
-    <!-- 最右边：更多按钮（预留，暂不添加功能） -->
     <ion-buttons slot="end">
       <ion-button (click)="showMoreOptions()">
         <ion-icon name="ellipsis-vertical-outline"></ion-icon>
@@ -19,31 +16,103 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <!-- 消息列表 -->
+<ion-content class="chat-content">
   <div class="messages-container" #messageContent>
     <div *ngFor="let msg of messages" 
          class="message-item" 
          [class.my-message]="msg.fromUserId === currentUser?.id"
          [class.other-message]="msg.fromUserId !== currentUser?.id">
-      <div class="message-bubble">
-        {{ msg.content }}
+      
+      <ion-avatar class="message-avatar left-avatar" *ngIf="msg.fromUserId !== currentUser?.id">
+        <img [src]="targetUserAvatar" alt="avatar">
+      </ion-avatar>
+      
+      <div class="message-bubble-wrapper">
+        <!-- 图片消息 -->
+        <div *ngIf="msg.type === 'image'" class="message-image">
+          <img [src]="msg.content" (click)="previewImage(msg.content)">
+        </div>
+        <!-- 语音消息 - 增强播放反馈 -->
+        <div *ngIf="msg.type === 'audio'" class="message-audio" (click)="playAudioMessage(msg)">
+          <ion-icon [name]="msg.isPlaying ? 'pause-circle-outline' : 'play-circle-outline'"></ion-icon>
+          <div class="audio-wave">
+            <span class="wave-bar" *ngFor="let i of [1,2,3,4,5]" [class.active]="msg.isPlaying"></span>
+          </div>
+          <span class="audio-duration">{{ msg.duration || 1 }}"</span>
+        </div>
+        <!-- 文字消息 -->
+        <div *ngIf="!msg.type || msg.type === 'text'" class="message-bubble">
+          {{ msg.content }}
+        </div>
+        <div class="message-time">{{ msg.timestamp | date:'HH:mm' }}</div>
       </div>
-      <div class="message-time">{{ msg.timestamp | date:'HH:mm' }}</div>
+      
+      <ion-avatar class="message-avatar right-avatar" *ngIf="msg.fromUserId === currentUser?.id">
+        <img [src]="myAvatar" alt="avatar">
+      </ion-avatar>
     </div>
   </div>
 </ion-content>
 
-<ion-footer>
+<ion-footer class="chat-footer">
   <ion-toolbar>
-    <ion-item lines="none">
-      <ion-input [(ngModel)]="newMessage" 
-                 placeholder="输入消息..."
-                 (keyup.enter)="sendMessage()">
+    <ion-item lines="none" class="input-item">
+      <!-- 语音/键盘切换按钮 -->
+      <ion-button (click)="toggleVoiceMode()" class="voice-toggle-btn">
+        <ion-icon *ngIf="isVoiceMode" name="keyboard-outline"></ion-icon>
+        <ion-icon *ngIf="!isVoiceMode" name="mic-outline"></ion-icon>
+      </ion-button>
+
+      <!-- 按住说话模式 -->
+      <div *ngIf="isVoiceMode" class="voice-input-container">
+        <ion-button 
+          (touchstart)="onTouchStart($event)"
+          (touchmove)="onTouchMove($event)"
+          (touchend)="onTouchEnd()"
+          (touchcancel)="cancelRecording()"
+          (mousedown)="onMouseDown($event)"
+          (mousemove)="onMouseMove($event)"
+          (mouseup)="onMouseUp()"
+          (mouseleave)="cancelRecording()"
+          class="voice-record-btn"
+          [class.recording]="isRecordingVoice"
+          [class.cancelling]="isCancelling">
+          {{ isRecordingVoice ? (isCancelling ? '上滑取消' : '松手发送') : '按住说话' }}
+        </ion-button>
+      </div>
+
+      <!-- 文字输入模式 -->
+      <ion-input 
+        *ngIf="!isVoiceMode"
+        [(ngModel)]="newMessage" 
+        placeholder="输入消息..."
+        (keyup.enter)="sendMessage()"
+        class="message-input">
       </ion-input>
-      <ion-button slot="end" (click)="sendMessage()" [disabled]="!newMessage.trim()">
-        <ion-icon name="send-outline"></ion-icon>
+
+      <!-- 表情包按钮 -->
+      <ion-button (click)="toggleEmojiPicker()" class="emoji-btn">
+        <ion-icon name="happy-outline"></ion-icon>
+      </ion-button>
+
+      <!-- 更多功能按钮（图片发送） -->
+      <ion-button (click)="showMoreActions()" class="more-btn">
+        <ion-icon name="add-circle-outline"></ion-icon>
+      </ion-button>
+
+      <!-- 发送按钮 -->
+      <ion-button (click)="sendMessage()" [disabled]="!newMessage.trim()" class="send-btn">
+        <ion-icon name="arrow-up-outline"></ion-icon>
       </ion-button>
     </ion-item>
+
+    <!-- 表情包面板 -->
+    <div *ngIf="showEmojiPicker" class="emoji-picker">
+      <div class="emoji-list">
+        <span *ngFor="let emoji of emojis" class="emoji-item" (click)="addEmoji(emoji)">
+          {{ emoji }}
+        </span>
+      </div>
+    </div>
   </ion-toolbar>
 </ion-footer>

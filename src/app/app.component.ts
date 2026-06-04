@@ -1,4 +1,4 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';  // ✅ 添加 OnInit
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, OnDestroy } from '@angular/core';  // ✅ 添加 OnDestroy
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
@@ -7,6 +7,7 @@ import { homeOutline, appsOutline, cameraOutline, chatbubblesOutline, personOutl
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Capacitor } from '@capacitor/core';
 import { ToastController, AlertController, ActionSheetController } from '@ionic/angular';
+import { HttpClient, HttpHeaders } from '@angular/common/http';  // ✅ 添加 HttpClient
 
 @Component({
   selector: 'app-root',
@@ -16,16 +17,22 @@ import { ToastController, AlertController, ActionSheetController } from '@ionic/
   imports: [IonicModule, RouterModule, CommonModule],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class AppComponent implements OnInit {  // ✅ 添加 implements OnInit
+export class AppComponent implements OnInit, OnDestroy {  // ✅ 添加 implements OnDestroy
   // 控制底部导航栏的显示/隐藏
   showTabs = false;
-  currentUrl: string = '';  // ✅ 添加 currentUrl 属性
+  currentUrl: string = '';
+  
+  // ✅ 未读数量相关
+  totalUnreadCount: number = 0;
+  private pollingInterval: any;
+  private apiUrl = 'https://guoguo.pythonanywhere.com/api';
 
   constructor(
     private router: Router,
     private toastController: ToastController,
     private alertController: AlertController,
-    private actionSheetController: ActionSheetController
+    private actionSheetController: ActionSheetController,
+    private http: HttpClient  // ✅ 添加 HttpClient
   ) {
     // 注册图标
     addIcons({
@@ -37,17 +44,91 @@ export class AppComponent implements OnInit {  // ✅ 添加 implements OnInit
     });
   }
 
-  // ✅ 使用 ngOnInit 而不是 constructor 中处理路由
+  // ✅ 初始化
   ngOnInit() {
     // 监听路由变化，控制导航栏显示/隐藏
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
-        this.currentUrl = event.urlAfterRedirects;  // ✅ 更新 currentUrl
-        // 在登录页和注册页隐藏导航栏，其他页面显示
+        this.currentUrl = event.urlAfterRedirects;
         this.showTabs = !(this.currentUrl.includes('/login') || this.currentUrl.includes('/register'));
         console.log('当前路由:', this.currentUrl, '显示导航栏:', this.showTabs);
       }
     });
+
+    // ✅ 加载未读数量
+    this.loadTotalUnreadCount();
+    
+    // ✅ 启动轮询（每5秒更新未读数）
+    this.startPolling();
+    
+    // ✅ 监听未读数量更新事件
+    window.addEventListener('unreadCountUpdated', this.handleUnreadUpdate.bind(this));
+  }
+
+  // ✅ 组件销毁时清理
+  ngOnDestroy() {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+    }
+    window.removeEventListener('unreadCountUpdated', this.handleUnreadUpdate.bind(this));
+  }
+
+  // ✅ 启动轮询
+  startPolling() {
+    this.pollingInterval = setInterval(() => {
+      this.loadTotalUnreadCount();
+    }, 5000);
+  }
+
+  // ✅ 处理未读数量更新事件
+  handleUnreadUpdate(event: any) {
+    if (event.detail && typeof event.detail.unreadCount === 'number') {
+      this.totalUnreadCount = event.detail.unreadCount;
+    }
+  }
+
+  // ✅ 获取请求头
+  private getHeaders(): HttpHeaders {
+    const token = localStorage.getItem('auth_token');
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+  }
+
+  // ✅ 加载总未读数量
+  loadTotalUnreadCount() {
+    const token = localStorage.getItem('auth_token');
+    if (!token) return;
+
+    // 获取消息未读数
+    this.http.get(`${this.apiUrl}/contacts`, { headers: this.getHeaders() }).subscribe({
+      next: (res: any) => {
+        if (res.success && res.data) {
+          const messageUnread = res.data.reduce((total: number, contact: any) => total + (contact.unread || 0), 0);
+          
+          // 获取好友申请未读数
+          this.http.get(`${this.apiUrl}/contact-requests/pending-count`, { headers: this.getHeaders() }).subscribe({
+            next: (reqRes: any) => {
+              if (reqRes.success) {
+                const requestUnread = reqRes.count || 0;
+                this.totalUnreadCount = messageUnread + requestUnread;
+                localStorage.setItem('totalUnreadCount', this.totalUnreadCount.toString());
+                console.log(`总未读: 消息${messageUnread} + 申请${requestUnread} = ${this.totalUnreadCount}`);
+              }
+            },
+            error: (err) => console.error('获取申请未读数失败', err)
+          });
+        }
+      },
+      error: (err) => console.error('获取未读消息数失败', err)
+    });
+  }
+
+  // ✅ 获取显示用的未读数字符串
+  getDisplayUnreadCount(): string {
+    if (this.totalUnreadCount === 0) return '';
+    return this.totalUnreadCount > 99 ? '99+' : this.totalUnreadCount.toString();
   }
 
   // ========== 页面跳转方法 ==========
@@ -74,16 +155,13 @@ export class AppComponent implements OnInit {  // ✅ 添加 implements OnInit
 
   // ========== 相机功能 ==========
   async openCamera() {
-    // 移动端使用 Capacitor
     if (Capacitor.isNativePlatform()) {
       await this.showActionSheet();
     } else {
-      // PC端使用浏览器相机
       await this.takePhotoWeb();
     }
   }
 
-  // 显示选择菜单（拍照/相册）
   private async showActionSheet() {
     const actionSheet = await this.actionSheetController.create({
       header: '选择照片',
@@ -112,7 +190,6 @@ export class AppComponent implements OnInit {  // ✅ 添加 implements OnInit
     await actionSheet.present();
   }
 
-  // 从相机拍照
   private async takePhotoFromCamera() {
     try {
       const permission = await Camera.checkPermissions();
@@ -147,7 +224,6 @@ export class AppComponent implements OnInit {  // ✅ 添加 implements OnInit
     }
   }
 
-  // 从相册选择
   private async selectFromGallery() {
     try {
       const permission = await Camera.checkPermissions();
@@ -181,7 +257,6 @@ export class AppComponent implements OnInit {  // ✅ 添加 implements OnInit
     }
   }
 
-  // PC端拍照（浏览器）
   private async takePhotoWeb() {
     try {
       const input = document.createElement('input');
@@ -212,7 +287,6 @@ export class AppComponent implements OnInit {  // ✅ 添加 implements OnInit
     }
   }
 
-  // 显示提示消息
   private async showToast(message: string, color: string = 'primary') {
     const toast = await this.toastController.create({
       message: message,

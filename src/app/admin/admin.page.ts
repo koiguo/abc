@@ -7,7 +7,9 @@ import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { homeOutline, addCircleOutline, createOutline, trashOutline, cubeOutline, searchOutline, gridOutline } from 'ionicons/icons';
 import { CropperService } from '../services/cropper.service';
+import { PriceUnitService } from '../services/price-unit.service';
 
+// ==================== 接口定义 ====================
 interface FunctionItem {
   id: number;
   name: string;
@@ -26,6 +28,20 @@ interface Banner {
   is_active: boolean;
 }
 
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  original_price: number | null;
+  image: string;
+  description: string;
+  category: string;
+  stock: number;
+  is_hot: boolean;
+  is_new: boolean;
+  sales_count?: number;
+}
+
 @Component({
   selector: 'app-admin',
   templateUrl: './admin.page.html',
@@ -35,16 +51,21 @@ interface Banner {
 })
 
 export class AdminPage implements OnInit {
+  // ==================== 常量配置 ====================
+  private readonly apiUrl = 'https://guoguo.pythonanywhere.com/api';
 
-  // ========== 商品管理相关 ==========
-  products: any[] = [];
-  filteredProducts: any[] = [];
+  // ==================== Tab 切换 ====================
+  activeTab: 'products' | 'functions' | 'banners' | 'settings' = 'products';
+
+  // ==================== 商品管理 ====================
+  products: Product[] = [];
+  filteredProducts: Product[] = [];
   searchKeyword: string = '';
   isLoading = false;
   showForm = false;
   isEditing = false;
   
-  currentProduct: any = { 
+  currentProduct: Product = { 
     id: 0,
     name: '', 
     price: 0, 
@@ -57,7 +78,7 @@ export class AdminPage implements OnInit {
     is_new: false
   };
 
-  // ========== 功能管理相关 ==========
+  // ==================== 功能管理 ====================
   functions: FunctionItem[] = [];
   showFunctionForm = false;
   isEditingFunction = false;
@@ -69,10 +90,7 @@ export class AdminPage implements OnInit {
     is_active: true
   };
 
-  // ========== Tab 切换 ==========
-  activeTab: 'products' | 'functions' | 'banners' = 'products';
-
-  // ========== 轮播图管理相关 ==========
+  // ==================== 轮播图管理 ====================
   banners: Banner[] = [];
   isLoadingBanners = false;
   showBannerForm = false;
@@ -86,14 +104,30 @@ export class AdminPage implements OnInit {
     is_active: true
   };
 
-  private apiUrl = 'https://guoguo.pythonanywhere.com/api';
+  // ==================== 价格单位设置 ====================
+  priceUnit: string = '¥';
+  priceUnitOptions = [
+    { label: '人民币 (¥)', value: '¥' },
+    { label: '美元 ($)', value: '$' },
+    { label: '欧元 (€)', value: '€' },
+    { label: '英镑 (£)', value: '£' },
+    { label: '日元 (¥)', value: '¥' },
+    { label: '韩元 (₩)', value: '₩' },
+    { label: '港元 (HK$)', value: 'HK$' },
+    { label: '新台币 (NT$)', value: 'NT$' },
+    { label: '自定义', value: 'custom' }
+  ];
+  customPriceUnit: string = '';
+  showCustomUnitInput: boolean = false;
 
+  // ==================== 构造函数 ====================
   constructor(
     private http: HttpClient,
     private toastController: ToastController,
     private loadingController: LoadingController,
     private router: Router,
-    private cropperService: CropperService
+    private cropperService: CropperService,
+    private priceUnitService: PriceUnitService
   ) {
     addIcons({ 
       homeOutline, 
@@ -106,19 +140,66 @@ export class AdminPage implements OnInit {
     });
   }
 
+  // ==================== 生命周期 ====================
   ngOnInit() {
+    this.loadPriceUnitSettings();
+    this.loadAllData();
+  }
+
+  // 加载所有数据
+  private loadAllData() {
     this.loadProducts();
     this.loadFunctions();
     this.loadBanners();
   }
 
-  // ========== 商品管理 ==========
+  // ==================== 价格单位管理 ====================
+  private loadPriceUnitSettings() {
+    const savedUnit = localStorage.getItem('price_unit');
+    const savedCustomUnit = localStorage.getItem('custom_price_unit');
+    
+    if (savedUnit) {
+      this.priceUnit = savedUnit;
+      if (this.priceUnit === 'custom' && savedCustomUnit) {
+        this.customPriceUnit = savedCustomUnit;
+        this.showCustomUnitInput = true;
+      }
+    }
+  }
+
+  savePriceUnit() {
+    this.priceUnitService.setPriceUnit(this.priceUnit, this.customPriceUnit);
+    this.showToast('价格单位已保存', 'success');
+  }
+
+  onPriceUnitChange() {
+    if (this.priceUnit === 'custom') {
+      this.showCustomUnitInput = true;
+    } else {
+      this.showCustomUnitInput = false;
+      this.customPriceUnit = '';
+    }
+  }
+
+  getCurrentPriceUnit(): string {
+    return this.priceUnitService.getPriceUnit();
+  }
+
+  formatPrice(price: number): string {
+    return this.priceUnitService.formatPrice(price);
+  }
+
+  // ==================== 商品管理 - CRUD ====================
   loadProducts() {
     this.isLoading = true;
     this.http.get<any>(`${this.apiUrl}/products`).subscribe({
       next: (res) => {
         if (res.success) {
-          this.products = res.data;
+          this.products = res.data.map((product: any) => ({
+            ...product,
+            price: parseFloat(product.price) || 0,
+            original_price: product.original_price ? parseFloat(product.original_price) : null
+          }));
           this.filteredProducts = [...this.products];
         }
         this.isLoading = false;
@@ -144,6 +225,21 @@ export class AdminPage implements OnInit {
 
   showAddForm() {
     this.isEditing = false;
+    this.resetCurrentProduct();
+    this.showForm = true;
+  }
+
+  editProduct(product: Product) {
+    this.isEditing = true;
+    this.currentProduct = { 
+      ...product,
+      price: product.price ? parseFloat(product.price as any) : 0,
+      original_price: product.original_price ? parseFloat(product.original_price as any) : null
+    };
+    this.showForm = true;
+  }
+
+  private resetCurrentProduct() {
     this.currentProduct = { 
       id: 0,
       name: '', 
@@ -156,36 +252,52 @@ export class AdminPage implements OnInit {
       is_hot: false,
       is_new: false
     };
-    this.showForm = true;
-  }
-
-  editProduct(product: any) {
-    this.isEditing = true;
-    this.currentProduct = { ...product };
-    this.showForm = true;
   }
 
   async saveProduct() {
-    if (!this.currentProduct.name || !this.currentProduct.price) {
-      this.showToast('请填写名称和价格', 'warning');
+    if (!this.currentProduct.name) {
+      this.showToast('请填写商品名称', 'warning');
+      return;
+    }
+    
+    if (!this.currentProduct.price || this.currentProduct.price <= 0) {
+      this.showToast('请输入有效的价格', 'warning');
       return;
     }
     
     const loading = await this.loadingController.create({ message: '保存中...' });
     await loading.present();
     
+    const productData = {
+      name: this.currentProduct.name,
+      price: parseFloat(this.currentProduct.price as any),
+      original_price: this.currentProduct.original_price ? parseFloat(this.currentProduct.original_price as any) : null,
+      image: this.currentProduct.image,
+      description: this.currentProduct.description,
+      category: this.currentProduct.category,
+      stock: this.currentProduct.stock || 0,
+      is_hot: this.currentProduct.is_hot || false,
+      is_new: this.currentProduct.is_new || false
+    };
+    
+    if (this.isEditing) {
+      Object.assign(productData, { id: this.currentProduct.id });
+    }
+    
     const url = this.isEditing 
       ? `${this.apiUrl}/products/${this.currentProduct.id}` 
       : `${this.apiUrl}/products/add`;
     const method = this.isEditing ? 'put' : 'post';
     
-    this.http[method](url, this.currentProduct).subscribe({
+    this.http[method](url, productData).subscribe({
       next: async (res: any) => {
         await loading.dismiss();
         if (res.success) {
           this.showToast(this.isEditing ? '更新成功' : '添加成功', 'success');
           this.showForm = false;
           this.loadProducts();
+        } else {
+          this.showToast(res.message || '操作失败', 'danger');
         }
       },
       error: async () => {
@@ -218,7 +330,36 @@ export class AdminPage implements OnInit {
     this.showForm = false;
   }
 
-  // ========== 图片处理 ==========
+  // ==================== 商品管理 - 价格处理 ====================
+  onPriceChange(event: any) {
+    let value = event.detail.value;
+    if (value === null || value === undefined || value === '') {
+      this.currentProduct.price = 0;
+    } else {
+      const numValue = parseFloat(value);
+      if (!isNaN(numValue)) {
+        this.currentProduct.price = numValue;
+      } else {
+        this.currentProduct.price = 0;
+      }
+    }
+  }
+
+  onOriginalPriceChange(event: any) {
+    let value = event.detail.value;
+    if (value === null || value === undefined || value === '') {
+      this.currentProduct.original_price = null;
+    } else {
+      const numValue = parseFloat(value);
+      if (!isNaN(numValue) && numValue > 0) {
+        this.currentProduct.original_price = numValue;
+      } else {
+        this.currentProduct.original_price = null;
+      }
+    }
+  }
+
+  // ==================== 商品管理 - 图片处理 ====================
   async selectAndCropImage() {
     try {
       const croppedBlob = await this.cropperService.cropImage({
@@ -229,7 +370,7 @@ export class AdminPage implements OnInit {
       });
       
       if (croppedBlob) {
-        await this.uploadCroppedImage(croppedBlob);
+        await this.uploadProductImage(croppedBlob);
       }
     } catch (error) {
       console.error('取消或失败:', error);
@@ -262,7 +403,7 @@ export class AdminPage implements OnInit {
       await loading.dismiss();
       
       if (croppedBlob) {
-        await this.uploadCroppedImage(croppedBlob);
+        await this.uploadProductImage(croppedBlob);
       }
     } catch (error) {
       await loading.dismiss();
@@ -273,7 +414,7 @@ export class AdminPage implements OnInit {
     }
   }
 
-  async uploadCroppedImage(blob: Blob) {
+  private async uploadProductImage(blob: Blob) {
     const loading = await this.loadingController.create({ 
       message: '上传中...',
       spinner: 'crescent'
@@ -301,7 +442,7 @@ export class AdminPage implements OnInit {
       });
   }
 
-  // ========== 轮播图管理 ==========
+  // ==================== 轮播图管理 ====================
   loadBanners() {
     this.isLoadingBanners = true;
     this.http.get<any>(`${this.apiUrl}/admin/banners`).subscribe({
@@ -348,14 +489,14 @@ export class AdminPage implements OnInit {
       });
       
       if (croppedBlob) {
-        await this.uploadCroppedBannerImage(croppedBlob);
+        await this.uploadBannerImageToServer(croppedBlob);
       }
     } catch (error) {
       console.error('取消或失败:', error);
     }
   }
 
-  async uploadCroppedBannerImage(blob: Blob) {
+  private async uploadBannerImageToServer(blob: Blob) {
     const loading = await this.loadingController.create({ message: '上传中...' });
     await loading.present();
     
@@ -382,7 +523,7 @@ export class AdminPage implements OnInit {
 
   async saveBanner() {
     if (!this.currentBanner.image_url) {
-      this.showToast('请填写图片URL', 'warning');
+      this.showToast('请上传图片', 'warning');
       return;
     }
     
@@ -435,7 +576,7 @@ export class AdminPage implements OnInit {
     this.showBannerForm = false;
   }
 
-  // ========== 功能管理 ==========
+  // ==================== 功能管理 ====================
   loadFunctions() {
     this.http.get<any>(`${this.apiUrl}/admin/functions`).subscribe({
       next: (res) => {
@@ -536,7 +677,7 @@ export class AdminPage implements OnInit {
     this.showFunctionForm = false;
   }
 
-  // ========== 通用方法 ==========
+  // ==================== 通用方法 ====================
   goToHome() {
     this.router.navigate(['/home']);
   }

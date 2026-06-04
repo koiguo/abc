@@ -13,5 +13,6 @@ export const routes: Routes = [
   { path: 'product-detail', loadComponent: () => import('./product-detail/product-detail.page').then( m => m.ProductDetailPage)},
   { path: 'select-functions', loadComponent: () => import('./select-functions/select-functions.page').then(m => m.SelectFunctionsPage)},
   { path: 'cart', loadComponent: () => import('./cart/cart.page').then( m => m.CartPage)},
+  { path: 'user-detail', loadComponent: () => import('./user/user-detail.page').then(m => m.UserDetailPage) },
   { path: '**', redirectTo: '/home' }
 ];

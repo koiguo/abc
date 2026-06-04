@@ -1,14 +1,12 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
-import { AlertController, LoadingController, NavController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import { UserService } from '../services/user.service';
 import { CommonModule } from '@angular/common'; 
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { CropperService } from '../services/cropper.service';
 
 @Component({
   selector: 'app-user',
@@ -19,11 +17,13 @@ import { CropperService } from '../services/cropper.service';
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class UserPage implements OnInit {
+  user: any = {};
   
   username: string = '';
   email: string = '';
   avatar: string = 'https://ionicframework.com/docs/img/demos/avatar.svg';
   phone: string = '';
+  bio: string = '';
   functionButtons: any[] = [];
   cartCount: number = 0;
   private apiUrl = 'https://guoguo.pythonanywhere.com/api';
@@ -32,11 +32,7 @@ export class UserPage implements OnInit {
     private alertController: AlertController,
     private authService: AuthService,
     private router: Router,
-    private http: HttpClient,
-    private userService: UserService,
-    private loadingController: LoadingController,
-    private cropperService: CropperService,
-    private navController: NavController
+    private http: HttpClient
   ) {}
 
   ngOnInit() {
@@ -58,98 +54,43 @@ export class UserPage implements OnInit {
   loadUserInfo() {
     const user = this.authService.getCurrentUser();
     if (!user) {
-      this.username = '点击登录';
+      this.user = {
+        name: '点击头像登录',
+        phone: '点击头像登录',
+        avatar: 'https://ionicframework.com/docs/img/demos/avatar.svg',
+        bio: '立即登录享受更多功能'
+      };
+      this.username = '点击头像登录';
       this.phone = '点击头像登录';
-      this.email = '立即登录享受更多功能';
       this.avatar = 'https://ionicframework.com/docs/img/demos/avatar.svg';
+      this.bio = '立即登录享受更多功能';
       return;
     }
-    
+
+    this.user = user;
     this.username = user.name || user.username || '用户';
     this.phone = user.phone || '未绑定';
-    this.email = user.email || '暂无邮箱';
     this.avatar = user.avatar || 'https://ionicframework.com/docs/img/demos/avatar.svg';
+    this.bio = user.bio || '这个人很懒，什么都没写';
   }
 
-  /**
-   * 检查登录状态，未登录则跳转登录页
-   * @returns 返回当前用户，未登录返回 null 并已跳转
-   */
   private async checkLoginAndRedirect(): Promise<any | null> {
-  const user = this.authService.getCurrentUser();
-  if (!user) {
-    // 使用 window.location.href 强制刷新页面，确保登录页正常显示
-    window.location.href = '/login';
-    return null;
-  }
-  return user;
-}
-
-  // 修改头像
-  async changeAvatar() {
-    const user = await this.checkLoginAndRedirect();
-    if (!user) return;
-    
-    console.log('开始裁剪头像');
-    
-    try {
-      const croppedBlob = await this.cropperService.cropImage({
-        aspectRatio: 1,
-        width: 500,
-        height: 500,
-        quality: 0.9
-      });
-      
-      console.log('裁剪结果:', croppedBlob);
-      
-      if (croppedBlob) {
-        await this.uploadImage(croppedBlob);
-      } else {
-        console.log('用户取消了裁剪');
-      }
-    } catch (error) {
-      console.error('裁剪失败:', error);
-      this.showAlert('错误', '裁剪失败，请重试');
-    }
-  }
-
-  // 上传图片
-  async uploadImage(blob: Blob) {
     const user = this.authService.getCurrentUser();
-    if (!user) return;
-    
-    const loading = await this.loadingController.create({
-      message: '上传中...'
-    });
-    await loading.present();
-    
-    try {
-      const formData = new FormData();
-      formData.append('avatar', blob, `avatar_${user.id}_${Date.now()}.jpg`);
-      
-      this.userService.uploadAvatar(formData).subscribe({
-        next: async (res: any) => {
-          await loading.dismiss();
-          if (res.success && res.data?.url) {
-            this.avatar = res.data.url;
-            user.avatar = res.data.url;
-            localStorage.setItem('user', JSON.stringify(user));
-            this.userService.saveAvatarUrl(user.id, res.data.url).subscribe();
-            this.showAlert('成功', '头像更新成功');
-          } else {
-            this.showAlert('错误', res.message || '上传失败');
-          }
-        },
-        error: async (err) => {
-          await loading.dismiss();
-          console.error('上传失败:', err);
-          this.showAlert('错误', '上传失败，请重试');
-        }
-      });
-    } catch (error) {
-      await loading.dismiss();
-      this.showAlert('错误', '处理图片失败');
+    if (!user) {
+      window.location.href = '/login';
+      return null;
     }
+    return user;
+  }
+
+  // 跳转到用户详细页（未登录则跳转登录页）
+  async goToUserDetail() {
+    const user = this.authService.getCurrentUser();
+    if (!user) {
+      window.location.href = '/login';
+      return;
+    }
+    this.router.navigate(['/user-detail']);
   }
 
   loadCartCount() {
@@ -174,17 +115,11 @@ export class UserPage implements OnInit {
       });
   }
 
-  goToCart() {
-    this.checkLoginAndRedirect();  // 检查登录，会自动跳转
-    // 注意：上面这行不会等待，需要修改
-  }
-
-  // 修正版 goToCart
   async goToCartAsync() {
-  const user = await this.checkLoginAndRedirect();
-  if (!user) return;
-  this.router.navigate(['/cart']);
-}
+    const user = await this.checkLoginAndRedirect();
+    if (!user) return;
+    this.router.navigate(['/cart']);
+  }
 
   loadFunctions() {
     this.functionButtons = [
@@ -193,14 +128,6 @@ export class UserPage implements OnInit {
       { id: 3, name: '购物车', icon: 'cart-outline' },
       { id: 4, name: '更多', icon: 'ellipsis-horizontal-outline' }
     ];
-  }
-
-  // 点击头像显示个人资料
-  async showProfile() {
-    const user = await this.checkLoginAndRedirect();
-    if (!user) return;
-    
-    this.showAlert('个人资料', `用户名：${this.username}\n手机：${this.phone}\n邮箱：${this.email}`);
   }
 
   async openSettings() {
@@ -223,21 +150,21 @@ export class UserPage implements OnInit {
   }
 
   async confirmLogout() {
-  const alert = await this.alertController.create({
-    header: '确认退出',
-    message: '确定要退出登录吗？',
-    buttons: [
-      { text: '取消', role: 'cancel' },
-      { text: '退出', handler: () => { 
-        this.authService.logout(); 
-        // 使用 window.location.href 强制跳转
-        window.location.href = '/home';
-        this.showAlert('提示', '已退出登录'); 
-      }}
-    ]
-  });
-  await alert.present();
-}
+    const alert = await this.alertController.create({
+      header: '确认退出',
+      message: '确定要退出登录吗？',
+      buttons: [
+        { text: '取消', role: 'cancel' },
+        { text: '退出', handler: () => { 
+          this.authService.logout(); 
+          window.location.href = '/home';
+          this.showAlert('提示', '已退出登录'); 
+        }}
+      ]
+    });
+    await alert.present();
+  }
+
   async showAlert(header: string, message: string) {
     const alert = await this.alertController.create({
       header: header,

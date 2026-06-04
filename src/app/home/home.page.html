@@ -21,80 +21,72 @@
 </ion-header>
 
 <ion-content class="home-page">
-  <!-- 图片轮播图 - 动态加载 -->
-<div *ngIf="isLoadingBanners" class="banner-loading">
-  <ion-spinner name="crescent"></ion-spinner>
-</div>
+  <!-- 图片轮播图 - 移除加载动画 -->
+  <swiper-container *ngIf="banners.length > 0" 
+                    class="my-swiper" 
+                    pagination="true">
+    <swiper-slide *ngFor="let banner of banners">
+      <img [src]="banner.image_url" [alt]="banner.title" />
+    </swiper-slide>
+  </swiper-container>
 
-<swiper-container *ngIf="!isLoadingBanners && banners.length > 0" 
-                  class="my-swiper" 
-                  pagination="true">
-  <swiper-slide *ngFor="let banner of banners">
-    <img [src]="banner.image_url" [alt]="banner.title" />
-  </swiper-slide>
-</swiper-container>
+  <!-- 没有轮播图时显示默认图 -->
+  <div *ngIf="banners.length === 0" class="default-banner">
+    <img src="assets/icon/home-slide/默认.png" />
+  </div>
 
-<!-- 无轮播图时显示默认 -->
-<div *ngIf="!isLoadingBanners && banners.length === 0" class="default-banner">
-  <img src="assets/icon/home-slide/默认.png" />
-</div>
-
-  <!-- 功能按钮 - 动态加载 -->
-<ion-card>
-  <ion-card-header>
-    <ion-card-title>功能分类</ion-card-title>
-  </ion-card-header>
-  <ion-card-content>
-    <div *ngIf="isLoadingFunctions" style="text-align: center; padding: 20px;">
-      <ion-spinner name="crescent"></ion-spinner>
-    </div>
-    
-    <div class="grid-4" *ngIf="!isLoadingFunctions">
-      <!-- 用户已选择的功能 -->
-      <div *ngFor="let func of functionButtons" class="function-item" (click)="openFunction(func)">
-        <div class="function-icon">
-          <ion-icon [name]="func.icon"></ion-icon>
+  <!-- 功能按钮 - 移除加载动画 -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>功能分类</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="grid-4">
+        <div *ngFor="let func of functionButtons" class="function-item" (click)="openFunction(func)">
+          <div class="function-icon">
+            <ion-icon [name]="func.icon"></ion-icon>
+          </div>
+          <ion-label>{{ func.name }}</ion-label>
+          <div class="delete-icon" (click)="removeFunction($event, func)">
+            <ion-icon name="close-circle-outline"></ion-icon>
+          </div>
         </div>
-        <ion-label>{{ func.name }}</ion-label>
-        <!-- 删除按钮 -->
-        <div class="delete-icon" (click)="removeFunction($event, func)">
-          <ion-icon name="close-circle-outline"></ion-icon>
+        
+        <div *ngIf="functionButtons.length < maxSelect && availableFunctions.length > functionButtons.length" 
+             class="function-item add-item" 
+             (click)="showAddFunctionSheet()">
+          <div class="function-icon">
+            <ion-icon name="add-circle-outline"></ion-icon>
+          </div>
+          <ion-label>添加</ion-label>
         </div>
       </div>
       
-      <!-- 添加功能按钮（和功能图标一样大小，未满8个且还有可用功能时显示） -->
-      <div *ngIf="functionButtons.length < maxSelect && availableFunctions.length > functionButtons.length" 
-           class="function-item add-item" 
-           (click)="showAddFunctionSheet()">
-        <div class="function-icon">
-          <ion-icon name="add-circle-outline"></ion-icon>
-        </div>
-        <ion-label>添加</ion-label>
+      <div *ngIf="functionButtons.length === 0" style="text-align: center; padding: 20px; color: gray;">
+        点击"添加"按钮，选择快捷功能
       </div>
-    </div>
-    
-    <!-- 提示 -->
-    <div *ngIf="functionButtons.length === 0 && !isLoadingFunctions" style="text-align: center; padding: 20px; color: gray;">
-      点击"添加"按钮，选择快捷功能
-    </div>
-  </ion-card-content>
-</ion-card>
+    </ion-card-content>
+  </ion-card>
 
-  <!-- 只有管理员能看到 -->
+  <!-- 管理员后台按钮 -->
   <ion-button *ngIf="showAdminEntry()" (click)="goToAdmin()" expand="full" color="primary">
     <ion-icon name="settings-outline" slot="start"></ion-icon>
     管理后台
   </ion-button>
 
-  <!-- 产品图 -->
+  <!-- 热门推荐商品 - 移除加载动画 -->
   <ion-card>
     <ion-card-header>
       <ion-card-title>热门推荐</ion-card-title>
     </ion-card-header>
-    <ion-card-content>
+    <ion-card-content style="padding-bottom: 0;">
       <div class="product-grid" *ngIf="products.length > 0">
         <div *ngFor="let product of products" class="product-card" (click)="viewProduct(product)">
-          <img [src]="product.image || 'https://picsum.photos/200/200?random=' + product.id" class="product-image">
+          <div class="product-image-container">
+            <img [src]="product.image || 'https://picsum.photos/300/200?random=' + product.id" 
+                 class="product-image"
+                 alt="{{ product.name }}">
+          </div>
           <div class="product-info">
             <h3>{{ product.name }}</h3>
             <p class="price">¥{{ product.price }}</p>

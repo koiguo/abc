@@ -63,48 +63,53 @@ export class LoginPage implements OnInit {
   }
 
   async login() {
-    if (!this.loginData.account || !this.loginData.password) {
-      this.showToast('请填写完整信息', 'warning');
-      return;
-    }
-
-    const loading = await this.loadingController.create({
-      message: '登录中...',
-      spinner: 'crescent'
-    });
-    await loading.present();
-
-    this.authService.login(this.loginData.account, this.loginData.password)
-      .subscribe({
-        next: async (response: any) => {
-          await loading.dismiss();
-          
-          if (response.success) {
-            console.log('登录成功，保存的用户信息:', response.data.user.role);
-
-            localStorage.setItem('user', JSON.stringify(response.data.user));
-            localStorage.setItem('userRole', response.data.user.role || 'user');
-
-            this.showToast('登录成功！', 'success');
-            
-            // ✅ 使用 window.location.href 强制刷新页面
-            if (response.data.user.role === 'admin') {
-              window.location.href = '/admin';
-            } else {
-              window.location.href = '/home';
-            }
-          } else {
-            this.showToast(response.message || '登录失败', 'danger');
-          }
-        },
-        error: async (error) => {
-          await loading.dismiss();
-          console.error('登录错误:', error);
-          this.showToast('网络错误，请稍后重试', 'danger');
-        }
-      });
+  if (!this.loginData.account || !this.loginData.password) {
+    this.showToast('请填写完整信息', 'warning');
+    return;
   }
 
+  const loading = await this.loadingController.create({
+    message: '登录中...',
+    spinner: 'crescent'
+  });
+  await loading.present();
+
+  this.authService.login(this.loginData.account, this.loginData.password)
+    .subscribe({
+      next: async (response: any) => {
+        await loading.dismiss();
+        
+        if (response.success) {
+          console.log('登录成功，用户信息:', response.data.user);
+          
+          // ✅ 关键：手动保存 auth_token（用户ID）
+          localStorage.setItem('auth_token', response.data.user.id.toString());
+          localStorage.setItem('user', JSON.stringify(response.data.user));
+          localStorage.setItem('userRole', response.data.user.role || 'user');
+          
+          console.log('保存的auth_token:', localStorage.getItem('auth_token'));
+          
+          this.showToast('登录成功！', 'success');
+          
+          // ✅ 使用路由跳转
+          if (response.data.user.role === 'admin') {
+            this.router.navigate(['/admin']);
+          } else {
+            this.router.navigate(['/messages']);
+          }
+        } else {
+          this.showToast(response.message || '登录失败', 'danger');
+        }
+      },
+      error: async (error) => {
+        await loading.dismiss();
+        console.error('登录错误:', error);
+        this.showToast('网络错误，请稍后重试', 'danger');
+      }
+    });
+}
+
+  
   async showToast(message: string, color: string = 'primary') {
     const toast = await this.toastController.create({
       message: message,

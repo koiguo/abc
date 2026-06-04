@@ -1,0 +1,90 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>个人资料</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- 头像区域 -->
+  <div class="avatar-section" (click)="changeAvatar()">
+    <ion-avatar class="user-avatar">
+      <img [src]="avatar || 'https://ionicframework.com/docs/img/demos/avatar.svg'" alt="avatar">
+    </ion-avatar>
+    <div class="avatar-edit-icon"></div>
+    <p class="avatar-tip">点击更换头像</p>
+  </div>
+
+  <!-- 信息表单 -->
+  <ion-list class="info-form">
+    <ion-item>
+      <ion-label position="stacked">昵称</ion-label>
+      <ion-input 
+        [(ngModel)]="editName" 
+        placeholder="请输入昵称"
+        (ionInput)="onFormChange()">
+      </ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">手机号</ion-label>
+      <ion-input 
+        [value]="phone" 
+        readonly
+        disabled>
+      </ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">邮箱</ion-label>
+      <ion-input 
+        [(ngModel)]="editEmail" 
+        type="email"
+        placeholder="请输入邮箱"
+        (ionInput)="onFormChange()">
+      </ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">性别</ion-label>
+      <ion-select [(ngModel)]="editGender" (ionChange)="onFormChange()" placeholder="请选择性别">
+        <ion-select-option value="male">男</ion-select-option>
+        <ion-select-option value="female">女</ion-select-option>
+        <ion-select-option value="secret">保密</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">生日</ion-label>
+      <ion-datetime 
+        [(ngModel)]="editBirthday"
+        (ionChange)="onFormChange()"
+        presentation="date"
+        placeholder="请选择生日">
+      </ion-datetime>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">个人简介</ion-label>
+      <ion-textarea 
+        [(ngModel)]="editBio" 
+        rows="3"
+        placeholder="介绍一下自己..."
+        (ionInput)="onFormChange()">
+      </ion-textarea>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">用户ID</ion-label>
+      <ion-input 
+        [value]="userId" 
+        readonly
+        disabled>
+      </ion-input>
+    </ion-item>
+  </ion-list>
+</ion-content>

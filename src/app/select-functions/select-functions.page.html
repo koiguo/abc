@@ -1,0 +1,62 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="closeOutline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>自定义快捷功能</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="saveSelection()">
+        <ion-icon name="checkmarkOutline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  
+  <!-- 已选中的功能 -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        已选择功能 ({{ selectedFunctions.length }}/{{ maxSelect }})
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="selected-grid">
+        <div *ngFor="let func of selectedFunctions" class="selected-item">
+          <ion-icon [name]="func.icon"></ion-icon>
+          <span>{{ func.name }}</span>
+          <ion-button fill="clear" size="small" (click)="removeSelected(func)">
+            <ion-icon name="trashOutline"></ion-icon>
+          </ion-button>
+        </div>
+        
+        <div *ngIf="selectedFunctions.length === 0" class="empty-tip">
+          点击下方功能添加
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- 所有可选功能 -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>全部功能</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="functions-grid">
+        <div *ngFor="let func of allFunctions" 
+             class="function-item"
+             [class.selected]="func.selected"
+             (click)="toggleFunction(func)">
+          <ion-icon [name]="func.icon"></ion-icon>
+          <span>{{ func.name }}</span>
+          <ion-icon *ngIf="func.selected" name="checkmarkOutline" class="check-icon"></ion-icon>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+</ion-content>

@@ -14,6 +14,7 @@ import { IonicModule } from '@ionic/angular';
   imports: [CommonModule, FormsModule, IonicModule]
 })
 export class RegisterPage {
+  
   registerData = {
     name: '',
     phone: '',
@@ -28,6 +29,16 @@ export class RegisterPage {
     private toastController: ToastController,
     private loadingController: LoadingController
   ) {}
+
+  // 返回登录页
+  goBack() {
+    this.router.navigate(['/login'], { replaceUrl: true });
+  }
+
+  // 跳转登录页
+  goToLogin() {
+    this.router.navigate(['/login'], { replaceUrl: true });
+  }
 
   async register() {
     // 表单验证
@@ -67,8 +78,7 @@ export class RegisterPage {
         
         if (response.success) {
           this.showToast('注册成功！请登录', 'success');
-          // 跳转到登录页
-          this.router.navigate(['/login']);
+          this.router.navigate(['/login'], { replaceUrl: true });
         } else {
           this.showToast(response.message || '注册失败', 'danger');
         }
@@ -89,9 +99,5 @@ export class RegisterPage {
       color: color
     });
     await toast.present();
-  }
-
-  goToLogin() {
-    this.router.navigate(['/login']);
   }
 }

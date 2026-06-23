@@ -1,40 +1,19 @@
 /*
  * App Global CSS
  * ----------------------------------------------------------------------------
- * Put style rules here that you want to apply globally. These styles are for
- * the entire app and not just one component. Additionally, this file can be
- * used as an entry point to import other CSS/Sass files to be included in the
- * output CSS.
- * For more information on global stylesheets, visit the documentation:
- * https://ionicframework.com/docs/layout/global-stylesheets
  */
-
-/* Core CSS required for Ionic components to work properly */
 @import "@ionic/angular/css/core.css";
-
-/* Basic CSS for apps built with Ionic */
 @import "@ionic/angular/css/normalize.css";
 @import "@ionic/angular/css/structure.css";
 @import "@ionic/angular/css/typography.css";
 @import "@ionic/angular/css/display.css";
-
-/* Optional CSS utils that can be commented out */
 @import "@ionic/angular/css/padding.css";
 @import "@ionic/angular/css/float-elements.css";
 @import "@ionic/angular/css/text-alignment.css";
 @import "@ionic/angular/css/text-transformation.css";
 @import "@ionic/angular/css/flex-utils.css";
-
-/**
- * Ionic Dark Mode
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
- */
-
-/* @import "@ionic/angular/css/palettes/dark.always.css"; */
-/* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
 
 // 标题居中
 .center-title {
@@ -42,6 +21,7 @@
   font-weight: 500;
   font-size: 18px;
 }
+
 // 相对定位
 .relative-pos {
   position: relative;
@@ -52,39 +32,22 @@
   cursor: pointer;
 }
 
-// 搜索框所在行布局
-ion-toolbar {
-  --min-height: 51px;
-  
-ion-searchbar {
-    --padding-start: 8px;
-    --padding-end: 8px;
-    padding: 4px 0;
-    --background: var(--ion-color-light);
-    --border-radius: 8px;
-  }
-  
-  ion-buttons {
-    margin-left: 8px;
-  }
-}
+// ============================================
+// 全局移除所有页面顶部间距
+// ============================================
 
-/* ============================================
- * 全局全屏样式 - 让所有页面占满屏幕
- * ============================================ */
-
-// 让所有页面组件占满全屏
-:host {
-  display: block;
-  height: 100%;
-}
-
-// 确保 ion-content 占满全屏
+// 移除所有 ion-content 的默认内边距
 ion-content {
-  --offset-top: 0px;
-  --offset-bottom: 0px;
-  height: 100%;
-  width: 100%;
+  --padding-top: 0 !important;
+  --padding-bottom: 0 !important;
+  --padding-start: 0 !important;
+  --padding-end: 0 !important;
+}
+
+// 移除滚动区域的默认内边距
+ion-content::part(scroll) {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 // 确保所有页面容器占满全屏
@@ -100,7 +63,7 @@ ion-router-outlet {
   height: auto;
 }
 
-/* 修复底部导航栏 - 高度刚好容纳图标和文字 */
+// 底部导航栏
 ion-tabs {
   flex-shrink: 0;
   height: auto;
@@ -117,7 +80,6 @@ ion-tab-bar {
   --padding-top: 0;
   --padding-bottom: 0;
   --background: var(--ion-background-color);
-  --opacity: 1;
   background: white;
 }
 
@@ -140,48 +102,7 @@ ion-tab-button ion-label {
   margin: 0;
 }
 
-/* 深色模式适配 */
-@media (prefers-color-scheme: dark) {
-  ion-tab-bar {
-    background: #1c1c1c;
-  }
-}
-
-// 修复安全区域（刘海屏适配）
-ion-content {
-  --padding-top: env(safe-area-inset-top);
-  --padding-bottom: env(safe-area-inset-bottom);
-  --padding-start: env(safe-area-inset-left);
-  --padding-end: env(safe-area-inset-right);
-}
-
-// 确保滚动内容正常
-.scroll-content {
-  height: 100%;
-}
-
-/* ============================================
- * 全局头像大小限制
- * ============================================ */
-
-// 限制所有 avatar 的大小
-ion-avatar {
-  width: 40px !important;
-  height: 40px !important;
-  min-width: 40px;
-  min-height: 40px;
-  max-width: 40px;
-  max-height: 40px;
-  border-radius: 50% !important;
-  overflow: hidden !important;
-  
-  img {
-    border-radius: 50% !important;
-    object-fit: cover !important;
-  }
-}
-
-// 在 toolbar 中的头像可以稍微小一点
+// 全局头像大小
 ion-toolbar ion-avatar {
   width: 36px !important;
   height: 36px !important;
@@ -189,8 +110,94 @@ ion-toolbar ion-avatar {
   min-height: 36px;
 }
 
-// 在按钮中的头像
 ion-buttons ion-avatar {
   width: 32px !important;
   height: 32px !important;
+}
+
+// ============================================
+// 聊天模态框样式
+// ============================================
+.chat-modal-fullscreen {
+  --height: 100%;
+  --width: 100%;
+  
+  .modal-wrapper {
+    height: 100%;
+    width: 100%;
+    --border-radius: 0;
+  }
+}
+
+ion-modal.chat-modal-fullscreen {
+  z-index: 1000;
+}
+
+// 重置聊天模态框内的 ion-content 样式
+.chat-modal-fullscreen ion-content {
+  --padding-top: 0 !important;
+  --padding-bottom: 0 !important;
+  --padding-start: 0 !important;
+  --padding-end: 0 !important;
+}
+.image-preview-modal {
+  --border-radius: 0px;
+  --background: transparent;
+  
+  .modal-wrapper {
+    --border-radius: 0px;
+    --box-shadow: none;
+    --background: transparent;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+// ============================================
+// 深色模式
+// ============================================
+@media (prefers-color-scheme: dark) {
+  ion-tab-bar {
+    background: #1c1c1c;
+  }
+  
+  ion-tab-button {
+    ion-icon {
+      color: #e0e0e0 !important;
+    }
+    ion-label {
+      color: #b0b0b0 !important;
+    }
+    &.tab-selected {
+      ion-icon {
+        color: var(--ion-color-primary) !important;
+      }
+      ion-label {
+        color: var(--ion-color-primary) !important;
+      }
+    }
+  }
+  
+  ion-icon {
+    color: #ffffff !important;
+  }
+  
+  ion-item ion-icon {
+    color: #e0e0e0 !important;
+  }
+  
+  ion-toolbar ion-icon {
+    color: #ffffff !important;
+  }
+  
+  ion-card ion-icon {
+    color: #e0e0e0 !important;
+  }
+  
+  ion-button ion-icon {
+    color: inherit !important;
+  }
 }

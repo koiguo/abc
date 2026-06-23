@@ -1,0 +1,368 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goToHome()">
+        <ion-icon name="home-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>管理后台</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="showAddForm()">
+        <ion-icon name="add-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  
+  <!-- Tab 切换栏 - 添加了 banners 选项 -->
+  <ion-toolbar>
+    <ion-segment [(ngModel)]="activeTab">
+      <ion-segment-button value="products">
+        <ion-label>商品管理</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="functions">
+        <ion-label>功能管理</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="banners">
+        <ion-label>轮播图管理</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- ==================== 商品管理 Tab ==================== -->
+  <div *ngIf="activeTab === 'products'">
+    <!-- 商品列表 -->
+    <div *ngIf="!showForm">
+      <ion-searchbar 
+        [(ngModel)]="searchKeyword" 
+        (ionInput)="filterProducts()" 
+        placeholder="搜索商品..." 
+        showCancelButton="focus">
+      </ion-searchbar>
+
+      <ion-list>
+        <ion-item-sliding *ngFor="let product of filteredProducts">
+          <ion-item>
+            <ion-thumbnail slot="start" style="width: 60px; height: 60px;">
+              <img [src]="product.image || 'https://picsum.photos/60/60?random=' + product.id" 
+                   style="object-fit: cover; border-radius: 8px;">
+            </ion-thumbnail>
+            
+            <ion-label>
+              <h2>{{ product.name }}</h2>
+              <p>
+                <span style="color: red; font-weight: bold;">¥{{ product.price }}</span>
+                <span *ngIf="product.original_price" style="text-decoration: line-through; margin-left: 8px; font-size: 12px;">
+                  原价 ¥{{ product.original_price }}
+                </span>
+              </p>
+              <p style="font-size: 12px; color: gray;">库存: {{ product.stock || 0 }} | 销量: {{ product.sales_count || 0 }}</p>
+              <p>
+                <ion-badge *ngIf="product.is_hot" color="danger" style="margin-right: 5px;">热卖</ion-badge>
+                <ion-badge *ngIf="product.is_new" color="success">新品</ion-badge>
+              </p>
+            </ion-label>
+          </ion-item>
+          
+          <ion-item-options side="end">
+            <ion-item-option (click)="editProduct(product)" color="primary">
+              <ion-icon name="create-outline"></ion-icon>
+              编辑
+            </ion-item-option>
+            <ion-item-option (click)="deleteProduct(product.id)" color="danger">
+              <ion-icon name="trash-outline"></ion-icon>
+              删除
+            </ion-item-option>
+          </ion-item-options>
+        </ion-item-sliding>
+      </ion-list>
+
+      <div *ngIf="filteredProducts.length === 0" style="text-align: center; padding: 50px;">
+        <ion-icon name="cube-outline" style="font-size: 64px; color: gray;"></ion-icon>
+        <p>暂无商品，点击右上角添加</p>
+      </div>
+    </div>
+
+    <!-- 商品添加/编辑表单 -->
+    <div *ngIf="showForm">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>{{ isEditing ? '编辑商品' : '添加商品' }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          
+          <div style="margin-bottom: 16px; text-align: center;">
+            <div *ngIf="currentProduct.image" style="margin-bottom: 12px;">
+              <img [src]="currentProduct.image" style="max-width: 100%; max-height: 150px; border-radius: 8px; margin-bottom: 8px;">
+              <div style="display: flex; gap: 8px; justify-content: center;">
+                <ion-button size="small" fill="clear" (click)="cropExistingImage()">
+                  <ion-icon name="crop-outline"></ion-icon>
+                  裁剪
+                </ion-button>
+              </div>
+            </div>
+            
+            <ion-button expand="block" (click)="selectAndCropImage()" style="margin-top: 8px;">
+              <ion-icon slot="start" name="camera-outline"></ion-icon>
+              {{ currentProduct.image ? '更换图片' : '选择图片' }} (拍照/相册)
+            </ion-button>
+            
+            <ion-text color="medium" style="font-size: 12px; display: block; margin-top: 8px;">
+              支持裁剪，建议正方形图片
+            </ion-text>
+          </div>
+          
+          <ion-item>
+            <ion-label position="stacked">商品名称 *</ion-label>
+            <ion-input [(ngModel)]="currentProduct.name" placeholder="请输入商品名称"></ion-input>
+          </ion-item>
+          
+        <ion-item>
+          <ion-label position="stacked">价格 *</ion-label>
+          <ion-input 
+            type="number" 
+            [value]="currentProduct.price" 
+            (ionInput)="onPriceChange($event)"
+            (wheel)="$event.preventDefault()"
+            placeholder="0.00"
+            step="0.01">
+            <span slot="start">¥</span>
+          </ion-input>
+        </ion-item>
+          
+        <ion-item>
+          <ion-label position="stacked">原价</ion-label>
+          <ion-input 
+            type="number" 
+            [value]="currentProduct.original_price" 
+            (ionInput)="onOriginalPriceChange($event)"
+            (wheel)="$event.preventDefault()"
+            placeholder="0.00"
+            step="0.01">
+            <span slot="start">¥</span>
+          </ion-input>
+        </ion-item>
+          
+          <ion-item>
+            <ion-label position="stacked">库存</ion-label>
+            <ion-input type="number" [(ngModel)]="currentProduct.stock" placeholder="0"></ion-input>
+          </ion-item>
+          
+          <ion-item>
+            <ion-label position="stacked">分类</ion-label>
+            <ion-select [(ngModel)]="currentProduct.category" placeholder="请选择分类">
+              <ion-select-option value="服装">服装</ion-select-option>
+              <ion-select-option value="鞋子">鞋子</ion-select-option>
+              <ion-select-option value="数码">数码</ion-select-option>
+              <ion-select-option value="箱包">箱包</ion-select-option>
+              <ion-select-option value="配饰">配饰</ion-select-option>
+            </ion-select>
+          </ion-item>
+          
+          <ion-item>
+            <ion-label>热卖</ion-label>
+            <ion-toggle [(ngModel)]="currentProduct.is_hot"></ion-toggle>
+          </ion-item>
+          
+          <ion-item>
+            <ion-label>新品</ion-label>
+            <ion-toggle [(ngModel)]="currentProduct.is_new"></ion-toggle>
+          </ion-item>
+          
+          <ion-item>
+            <ion-label position="stacked">商品描述</ion-label>
+            <ion-textarea [(ngModel)]="currentProduct.description" rows="3" placeholder="请输入商品描述..."></ion-textarea>
+          </ion-item>
+          
+          <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
+            <ion-button expand="full" (click)="saveProduct()" [disabled]="!currentProduct.name || !currentProduct.price">
+              {{ isEditing ? '更新商品' : '添加商品' }}
+            </ion-button>
+            <ion-button expand="full" fill="outline" (click)="cancelForm()">
+              取消
+            </ion-button>
+          </div>
+          
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+
+  <!-- ==================== 功能管理 Tab ==================== -->
+  <div *ngIf="activeTab === 'functions'">
+    
+    <!-- 添加功能按钮 -->
+    <ion-button expand="block" (click)="showAddFunctionForm()">
+      <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+      添加功能
+    </ion-button>
+    
+    <!-- 功能列表 -->
+    <ion-list *ngIf="!showFunctionForm">
+      <ion-item-sliding *ngFor="let func of functions">
+        <ion-item>
+          <ion-icon slot="start" [name]="func.icon"></ion-icon>
+          <ion-label>
+            <h2>{{ func.name }}</h2>
+            <p>图标: {{ func.icon }} | 排序: {{ func.sort_order }}</p>
+          </ion-label>
+          <ion-badge slot="end" [color]="func.is_active ? 'success' : 'danger'">
+            {{ func.is_active ? '启用' : '禁用' }}
+          </ion-badge>
+        </ion-item>
+        <ion-item-options side="end">
+          <ion-item-option (click)="toggleFunctionStatus(func)" [color]="func.is_active ? 'danger' : 'success'">
+            {{ func.is_active ? '禁用' : '启用' }}
+          </ion-item-option>
+          <ion-item-option (click)="editFunction(func)" color="primary">
+            <ion-icon name="create-outline"></ion-icon>
+            编辑
+          </ion-item-option>
+          <ion-item-option (click)="deleteFunction(func.id)" color="danger">
+            <ion-icon name="trash-outline"></ion-icon>
+            删除
+          </ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
+    </ion-list>
+    
+    <!-- 功能添加/编辑表单 -->
+    <div *ngIf="showFunctionForm">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>{{ isEditingFunction ? '编辑功能' : '添加功能' }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-item>
+            <ion-label position="stacked">功能名称 *</ion-label>
+            <ion-input [(ngModel)]="currentFunction.name" placeholder="例如: 外卖"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">图标名称</ion-label>
+            <ion-input [(ngModel)]="currentFunction.icon" placeholder="例如: fast-food-outline"></ion-input>
+            <ion-text slot="helper" color="medium" style="font-size: 12px;">
+              常用图标: home-outline, cart-outline, person-outline, settings-outline
+            </ion-text>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">排序</ion-label>
+            <ion-input type="number" [(ngModel)]="currentFunction.sort_order" placeholder="数字越小越靠前"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label>启用</ion-label>
+            <ion-toggle [(ngModel)]="currentFunction.is_active"></ion-toggle>
+          </ion-item>
+          <div style="margin-top: 16px; display: flex; gap: 10px;">
+            <ion-button expand="full" (click)="saveFunction()">保存</ion-button>
+            <ion-button expand="full" fill="outline" (click)="cancelFunctionForm()">取消</ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+
+  <!-- ==================== 轮播图管理 Tab（新增） ==================== -->
+  <div *ngIf="activeTab === 'banners'">
+    
+    <!-- 添加轮播图按钮 -->
+    <ion-button expand="block" (click)="showAddBannerForm()">
+      <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+      添加轮播图
+    </ion-button>
+    
+    <!-- 轮播图列表 -->
+    <ion-list *ngIf="!showBannerForm">
+      <ion-item-sliding *ngFor="let banner of banners">
+        <ion-item>
+          <ion-thumbnail slot="start">
+            <img [src]="banner.image_url" style="width: 60px; height: 60px; object-fit: cover;">
+          </ion-thumbnail>
+          <ion-label>
+            <h2>{{ banner.title || '无标题' }}</h2>
+            <p>排序: {{ banner.sort_order }} | 状态: {{ banner.is_active ? '启用' : '禁用' }}</p>
+          </ion-label>
+          <ion-badge slot="end" [color]="banner.is_active ? 'success' : 'danger'">
+            {{ banner.is_active ? '启用' : '禁用' }}
+          </ion-badge>
+        </ion-item>
+        <ion-item-options side="end">
+          <ion-item-option (click)="editBanner(banner)" color="primary">
+            <ion-icon name="create-outline"></ion-icon>
+            编辑
+          </ion-item-option>
+          <ion-item-option (click)="deleteBanner(banner.id)" color="danger">
+            <ion-icon name="trash-outline"></ion-icon>
+            删除
+          </ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
+    </ion-list>
+    
+    <!-- 空状态 -->
+    <div *ngIf="banners.length === 0 && !isLoadingBanners" style="text-align: center; padding: 50px;">
+      <ion-icon name="images-outline" style="font-size: 64px; color: gray;"></ion-icon>
+      <p>暂无轮播图，点击上方添加</p>
+    </div>
+    
+    <!-- 轮播图添加/编辑表单 -->
+    <div *ngIf="showBannerForm">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>{{ isEditingBanner ? '编辑轮播图' : '添加轮播图' }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          
+          <!-- 图片预览 -->
+          <div style="margin-bottom: 16px; text-align: center;">
+            <div *ngIf="currentBanner.image_url" style="margin-bottom: 12px;">
+              <img [src]="currentBanner.image_url" style="max-width: 100%; max-height: 150px; border-radius: 8px;">
+            </div>
+            <ion-button expand="block" (click)="uploadBannerImage()">
+              <ion-icon slot="start" name="camera-outline"></ion-icon>
+              {{ currentBanner.image_url ? '更换图片' : '上传图片' }}
+            </ion-button>
+          </div>
+          
+          <ion-item>
+            <ion-label position="stacked">标题</ion-label>
+            <ion-input [(ngModel)]="currentBanner.title" placeholder="请输入标题"></ion-input>
+          </ion-item>
+          
+          <ion-item>
+            <ion-label position="stacked">图片URL</ion-label>
+            <ion-input [(ngModel)]="currentBanner.image_url" placeholder="图片地址"></ion-input>
+          </ion-item>
+          
+          <ion-item>
+            <ion-label position="stacked">链接地址</ion-label>
+            <ion-input [(ngModel)]="currentBanner.link_url" placeholder="点击跳转链接(可选)"></ion-input>
+          </ion-item>
+          
+          <ion-item>
+            <ion-label position="stacked">排序</ion-label>
+            <ion-input type="number" [(ngModel)]="currentBanner.sort_order" placeholder="数字越小越靠前"></ion-input>
+          </ion-item>
+          
+          <ion-item>
+            <ion-label>启用</ion-label>
+            <ion-toggle [(ngModel)]="currentBanner.is_active"></ion-toggle>
+          </ion-item>
+          
+          <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
+            <ion-button expand="full" (click)="saveBanner()">
+              {{ isEditingBanner ? '更新' : '添加' }}
+            </ion-button>
+            <ion-button expand="full" fill="outline" (click)="cancelBannerForm()">
+              取消
+            </ion-button>
+          </div>
+          
+        </ion-card-content>
+      </ion-card>
+    </div>
+    
+  </div>
+
+</ion-content>

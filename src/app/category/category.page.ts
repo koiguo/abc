@@ -1,4 +1,4 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AlertController, ToastController } from '@ionic/angular';
@@ -12,7 +12,7 @@ import { AlertController, ToastController } from '@ionic/angular';
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 
-export class CategoryPage {
+export class CategoryPage implements OnInit {
   
   // 便民生活分类数据（11个功能）
   convenienceItems = [
@@ -60,12 +60,75 @@ export class CategoryPage {
     private alertController: AlertController,  // 弹窗控制器
     private toastController: ToastController  // 轻提示控制器
   ) {}
-     goBack() {
+
+  // ✅ 添加 ngOnInit 方法
+  ngOnInit() {
+    console.log('CategoryPage 初始化');
+    // 在这里添加初始化逻辑
+    this.loadUserPreferences();  // 加载用户偏好设置
+    this.loadSavedSelections();   // 加载之前保存的选择
   }
 
-    // 切换复选框状态,不可少
+  // 加载用户偏好设置
+  loadUserPreferences() {
+    // 从 localStorage 读取用户设置
+    const savedSettings = localStorage.getItem('categorySettings');
+    if (savedSettings) {
+      console.log('加载保存的设置:', savedSettings);
+    }
+  }
+
+  // 加载之前保存的选择
+  loadSavedSelections() {
+    // 从 localStorage 读取之前勾选的功能
+    const savedConvenience = localStorage.getItem('convenienceSelections');
+    const savedShopping = localStorage.getItem('shoppingSelections');
+    const savedFinance = localStorage.getItem('financeSelections');
+    
+    if (savedConvenience) {
+      const selectedNames = JSON.parse(savedConvenience);
+      this.convenienceItems.forEach(item => {
+        item.checked = selectedNames.includes(item.name);
+      });
+    }
+    
+    if (savedShopping) {
+      const selectedNames = JSON.parse(savedShopping);
+      this.shoppingItems.forEach(item => {
+        item.checked = selectedNames.includes(item.name);
+      });
+    }
+    
+    if (savedFinance) {
+      const selectedNames = JSON.parse(savedFinance);
+      this.financeItems.forEach(item => {
+        item.checked = selectedNames.includes(item.name);
+      });
+    }
+  }
+
+  // 保存选择到 localStorage
+  saveSelections() {
+    const selectedConvenience = this.convenienceItems.filter(item => item.checked).map(item => item.name);
+    const selectedShopping = this.shoppingItems.filter(item => item.checked).map(item => item.name);
+    const selectedFinance = this.financeItems.filter(item => item.checked).map(item => item.name);
+    
+    localStorage.setItem('convenienceSelections', JSON.stringify(selectedConvenience));
+    localStorage.setItem('shoppingSelections', JSON.stringify(selectedShopping));
+    localStorage.setItem('financeSelections', JSON.stringify(selectedFinance));
+    
+    console.log('已保存选择');
+  }
+
+  goBack() {
+    // 返回上一页
+    window.history.back();
+  }
+
+  // 切换复选框状态,不可少
   toggleCheckbox(item: any) {   
-    item.checked = !item.checked;  
+    item.checked = !item.checked;
+    this.saveSelections();  // ✅ 每次切换后自动保存
   }
 
 // 查找功能

@@ -1,61 +1,41 @@
-<!-- 顶部栏 -->
 <ion-header>
-  <!-- 第一行：标题 -->
-  <ion-toolbar>
-    <ion-title class="center-title">testV1.0</ion-title>
-  </ion-toolbar>
-
-  <!-- 第二行：搜索框 + 右侧图标 -->
-  <ion-toolbar>
-  <!-- 搜索框 + 添加图片搜索按键 -->
+  <ion-toolbar class="custom-toolbar">
     <ion-searchbar 
       placeholder="搜索商品、服务或商家..." 
       [(ngModel)]="searchText"
       (ionInput)="onSearch()"
-      animated
-      style="--min-height: 40px;">
+      animated>
     </ion-searchbar>
 
-    <!-- 右侧：消息通知 + 用户头像 -->
     <ion-buttons slot="end">
-      
-    <!-- 信息标志（有信息会显示红点） -->
       <ion-button (click)="goToMessages()" class="relative-pos">
         <ion-icon name="mail-outline" slot="icon-only"></ion-icon>
         <span *ngIf="hasUnreadMessage" class="red-dot"></span>
       </ion-button>
 
-      <!-- 用户头像（点击跳转用户页面） -->
       <ion-avatar (click)="goToUser()" class="clickable">
-        <img alt="avatar" src="https://ionicframework.com/docs/img/demos/avatar.svg" />
+        <img alt="avatar" [src]="userAvatar" />
       </ion-avatar>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-
-<!-- 可滚动内容 -->
 <ion-content class="home-page">
-  
-  <!-- 图片轮播图 -->
-    <!-- 轮播外层 -->
-    <swiper-container class="my-swiper" pagination="true">
-      <!-- 轮播1 -->
-      <swiper-slide>
-        <img src='assets\icon\home-slide\蔬菜.png' />
-      </swiper-slide>
+  <!-- 图片轮播图 - 移除加载动画 -->
+  <swiper-container *ngIf="banners.length > 0" 
+                    class="my-swiper" 
+                    pagination="true">
+    <swiper-slide *ngFor="let banner of banners">
+      <img [src]="banner.image_url" [alt]="banner.title" />
+    </swiper-slide>
+  </swiper-container>
 
-      <!-- 轮播2 -->
-      <swiper-slide>
-        <img src='assets\icon\home-slide\日常.png' />
-      </swiper-slide>
+  <!-- 没有轮播图时显示默认图 -->
+  <div *ngIf="banners.length === 0" class="default-banner">
+    <img src="assets/icon/home-slide/默认.png" />
+  </div>
 
-      <!-- 轮播3 -->
-      <swiper-slide>
-        <img src='assets\icon\home-slide\科技.png' />
-      </swiper-slide>
-    </swiper-container>
-  <!-- 功能按钮-->
+  <!-- 功能按钮 - 移除加载动画 -->
   <ion-card>
     <ion-card-header>
       <ion-card-title>功能分类</ion-card-title>
@@ -64,44 +44,75 @@
       <div class="grid-4">
         <div *ngFor="let func of functionButtons" class="function-item" (click)="openFunction(func)">
           <div class="function-icon">
-            <img [src]="func.icon" alt="{{func.name}}" class="custom-icon" />
+            <ion-icon [name]="func.icon"></ion-icon>
           </div>
           <ion-label>{{ func.name }}</ion-label>
+          <div class="delete-icon" (click)="removeFunction($event, func)">
+            <ion-icon name="close-circle-outline"></ion-icon>
+          </div>
         </div>
+        
+        <div *ngIf="functionButtons.length < maxSelect && availableFunctions.length > functionButtons.length" 
+             class="function-item add-item" 
+             (click)="showAddFunctionSheet()">
+          <div class="function-icon">
+            <ion-icon name="add-circle-outline"></ion-icon>
+          </div>
+          <ion-label>添加</ion-label>
+        </div>
+      </div>
+      
+      <div *ngIf="functionButtons.length === 0" style="text-align: center; padding: 20px; color: gray;">
+        点击"添加"按钮，选择快捷功能
       </div>
     </ion-card-content>
   </ion-card>
 
-  <!-- 产品图 -->
+  <!-- 管理员后台按钮 -->
+  <ion-button *ngIf="showAdminEntry()" (click)="goToAdmin()" expand="full" color="primary">
+    <ion-icon name="settings-outline" slot="start"></ion-icon>
+    管理后台
+  </ion-button>
+
+  <!-- 热门推荐商品 - 移除加载动画 -->
   <ion-card>
     <ion-card-header>
       <ion-card-title>热门推荐</ion-card-title>
-    </ion-card-header> 
-    <ion-card-content>
-      <!-- 两列布局 -->
-      <div class="product-grid">
+    </ion-card-header>
+    <ion-card-content style="padding-bottom: 0;">
+      <div class="product-grid" *ngIf="products.length > 0">
         <div *ngFor="let product of products" class="product-card" (click)="viewProduct(product)">
-          <img [src]="product.imageUrl" class="product-image">
+          <div class="product-image-container">
+            <img [src]="product.image || 'https://picsum.photos/300/200?random=' + product.id" 
+                 class="product-image"
+                 alt="{{ product.name }}">
+          </div>
           <div class="product-info">
             <h3>{{ product.name }}</h3>
-            <p class="price">{{ product.price }}</p>
+            <p class="price">¥{{ product.price }}</p>
+            <p class="original-price" *ngIf="product.original_price && product.original_price !== 0">
+              原价 ¥{{ product.original_price }}
+            </p>
+            <div class="product-tags">
+              <span class="hot-tag" *ngIf="product.is_hot">热卖</span>
+              <span class="new-tag" *ngIf="product.is_new">新品</span>
+            </div>
           </div>
         </div>
       </div>
-      
-      <!-- 加载更多 -->
-      <div *ngIf="isLoading" class="loading-more">
-      <div class="custom-spinner"></div>
-      <span>加载中...</span>
-    </div>
-  </ion-card-content>
-</ion-card>
-      <!-- 底部提示：向下滑动查看更多 -->
-<div class="bottom-tip">
-  <ion-text color="medium">
-    <ion-icon name="arrow-down-outline" class="arrow-icon"></ion-icon>
-    向下滑动查看更多
-    <ion-icon name="arrow-down-outline" class="arrow-icon"></ion-icon>
-  </ion-text>
-</div>
+
+      <div class="empty-products" *ngIf="products.length === 0">
+        <ion-icon name="cart-outline"></ion-icon>
+        <p>暂无商品，请稍后再试</p>
+      </div>        
+    </ion-card-content>
+  </ion-card>
+
+  <div class="bottom-tip">
+    <ion-text color="medium">
+      <ion-icon name="arrow-down-outline" class="arrow-icon"></ion-icon>
+      向下滑动查看更多
+      <ion-icon name="arrow-down-outline" class="arrow-icon"></ion-icon>
+    </ion-text>
+  </div>
 </ion-content>

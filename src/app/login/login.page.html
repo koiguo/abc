@@ -1,0 +1,66 @@
+<ion-content class="login-content">
+  <!-- ✅ 简化返回按钮，移除 ion-buttons 容器 -->
+  <div class="back-button" (click)="goBack()">
+    <ion-icon name="arrow-back-outline"></ion-icon>
+  </div>
+
+  <div class="login-container">
+    <!-- Logo区域 -->
+    <div class="logo-section">
+      <ion-icon name="person-circle-outline" class="logo-icon"></ion-icon>
+      <h1>欢迎回来</h1>
+      <p>请登录您的账号</p>
+    </div>
+
+    <!-- 登录表单 -->
+    <form (ngSubmit)="login()" class="login-form">
+      <ion-item lines="full" class="form-item">
+        <ion-icon name="person-outline" slot="start"></ion-icon>
+        <ion-input
+          [(ngModel)]="loginData.account"
+          name="account"
+          type="text"
+          placeholder="手机号 / 用户名"
+          required
+        ></ion-input>
+      </ion-item>
+
+      <ion-item lines="full" class="form-item">
+        <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+        <ion-input
+          [(ngModel)]="loginData.password"
+          name="password"
+          type="password"
+          placeholder="密码"
+          required
+        ></ion-input>
+      </ion-item>
+
+      <div class="form-options">
+        <ion-label class="remember-me">
+          <ion-checkbox [(ngModel)]="rememberMe" name="remember"></ion-checkbox>
+          <span class="checkbox-text">记住我</span>
+        </ion-label>
+        <ion-button fill="clear" size="small" class="forgot-btn">
+          忘记密码？
+        </ion-button>
+      </div>
+
+      <ion-button
+        expand="block"
+        type="submit"
+        class="login-btn"
+        shape="round"
+      >
+        登录
+      </ion-button>
+
+      <div class="register-link">
+        <span>还没有账号？</span>
+        <ion-button fill="clear" (click)="goToRegister()" class="register-btn">
+          立即注册
+        </ion-button>
+      </div>
+    </form>
+  </div>
+</ion-content>

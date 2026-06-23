@@ -1,0 +1,63 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>商品详情</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="addToCart()">
+        <ion-icon name="cart-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  
+  <!-- 商品图片 -->
+  <div class="product-image-container">
+    <img [src]="product.image || 'https://picsum.photos/400/400?random=' + product.id" 
+         class="product-image">
+  </div>
+
+  <!-- 商品信息 -->
+  <ion-card>
+    <ion-card-content>
+      <h1>{{ product.name }}</h1>
+      
+      <div class="price-section">
+        <span class="current-price">¥{{ product.price }}</span>
+        <span class="original-price" *ngIf="product.original_price">
+          原价 ¥{{ product.original_price }}
+        </span>
+      </div>
+      
+      <div class="tags" *ngIf="product.is_hot || product.is_new">
+        <ion-badge *ngIf="product.is_hot" color="danger">热卖</ion-badge>
+        <ion-badge *ngIf="product.is_new" color="success">新品</ion-badge>
+      </div>
+      
+      <div class="info-row">
+        <span>库存: {{ product.stock || 999 }}件</span>
+        <span>销量: {{ product.sales_count || 0 }}件</span>
+      </div>
+      
+      <ion-item-divider>
+        <ion-label>商品描述</ion-label>
+      </ion-item-divider>
+      
+      <p class="description">{{ product.description || '暂无描述' }}</p>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- 底部按钮 -->
+  <div class="bottom-buttons">
+    <ion-button expand="block" (click)="addToCart()">
+      <ion-icon slot="start" name="cart-outline"></ion-icon>
+      加入购物车
+    </ion-button>
+  </div>
+
+</ion-content>

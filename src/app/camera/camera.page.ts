@@ -49,7 +49,15 @@ export class CameraPage implements OnInit {
     private toastController: ToastController
   ) {}
 
-  ngOnInit() {}
+  ngOnInit() {const navigation = this.router.getCurrentNavigation();
+    const state = navigation?.extras.state as { photo?: string; source?: string };
+    
+    if (state?.photo) {
+      this.capturedPhoto = state.photo;
+      console.log('接收到照片:', state.source);
+      this.showToast('照片已加载', 'success');
+    }
+  }
 
   // 拍照按钮点击事件
   async takePhoto() {

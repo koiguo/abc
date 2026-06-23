@@ -1,12 +1,12 @@
 <ion-content class="register-content">
   <div class="register-container">
     <div class="header-section">
-      <ion-button fill="clear" (click)="goToLogin()" class="back-btn">
-        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
-      </ion-button>
+      <div class="back-button" (click)="goBack()">
+        <ion-icon name="arrow-back-outline" ></ion-icon>
+      </div>
       <h1>注册新账号</h1>
     </div>
-
+    
     <form (ngSubmit)="register()" class="register-form">
       <ion-item lines="full" class="form-item">
         <ion-icon name="person-outline" slot="start"></ion-icon>

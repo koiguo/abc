@@ -1,49 +1,84 @@
 .register-content {
   --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --padding-start: 0;
+  --padding-end: 0;
+  position: relative;
+}
+
+// 返回按钮
+.back-button {
+  position: absolute;
+  top: calc(20px + env(safe-area-inset-top));
+  left: 16px;
+  z-index: 1000;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  cursor: pointer;
+  
+  ion-icon {
+    font-size: 24px;
+    color: white;
+  }
+
+  &:active {
+    background: rgba(255, 255, 255, 0.4);
+    transform: scale(0.95);
+  }
 }
 
 .register-container {
   min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   padding: 20px;
 }
 
-.header-section {
-  display: flex;
-  align-items: center;
-  margin-bottom: 30px;
-  padding-top: 20px;
   
-  .back-btn {
-    --color: white;
-    --color-activated: rgba(255,255,255,0.8);
-    margin-right: 10px;
-  }
-  
-  h1 {
-    color: white;
-    font-size: 24px;
-    margin: 0;
-    flex: 1;
-    text-align: center;
-    margin-right: 48px;
-  }
+.logo-icon {
+  font-size: 80px;
+  color: white;
+  margin-bottom: 20px;
+}
+
+h1 {
+  color: rgb(241, 241, 241);
+  font-size: 28px;
+  margin: 0 0 10px 0;
+  font-weight: 600;
+}
+
+p {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 16px;
+  margin: 0;
 }
 
 .register-form {
   background: white;
   border-radius: 20px;
   padding: 30px 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   
   .form-item {
-    --padding-start: 0;
+    --padding-start: 16px;
+    --inner-padding-start: 12px;
     margin-bottom: 15px;
-    --border-color: #e0e0e0;
+    --background: #f7f7f7;
+    --border-radius: 12px;
     
     ion-icon {
       color: #667eea;
       font-size: 20px;
-      margin-right: 10px;
+      margin-right: 12px;
+      margin-left: 4px;
     }
   }
   
@@ -67,5 +102,48 @@
       margin-left: 5px;
       font-weight: 600;
     }
+  }
+}
+
+// ============================================
+// 深色模式适配
+// ============================================
+@media (prefers-color-scheme: dark) {
+  // 表单卡片
+  .register-form {
+    background: #1e1e1e;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  }
+  
+  // 输入框容器
+  .form-item {
+    --background: #2a2a2a !important;
+    --border-color: #4a4a4a !important;
+    background: #2a2a2a !important;
+    border-radius: 12px;
+  }
+  
+  // ion-input 组件
+  ion-input {
+    --background: #2a2a2a !important;
+    --color: #ffffff !important;
+    --placeholder-color: #a0a0a0 !important;
+    --placeholder-opacity: 1 !important;
+    background: #2a2a2a !important;
+    color: #ffffff !important;
+  }
+  
+  // 输入框图标
+  .form-item ion-icon {
+    color: #a78bfa !important;
+  }
+  
+  // 文字颜色
+  .login-link {
+    color: #d0d0d0 !important;
+  }
+  
+  .login-btn {
+    --color: #a78bfa !important;
   }
 }

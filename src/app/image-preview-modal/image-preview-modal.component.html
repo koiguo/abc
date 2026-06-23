@@ -1,0 +1,19 @@
+<div class="preview-container" 
+     #previewContainer
+     (click)="onBackgroundClick($event)">
+  
+  <img #imageElement 
+       [src]="imageUrl" 
+       alt="preview" 
+       class="preview-image"
+       (dblclick)="onDoubleTap()">
+  
+  <!-- 左上角关闭按钮 -->
+  <div class="close-button" (click)="dismiss()">
+    <ion-icon name="close-outline"></ion-icon>
+  </div>
+  
+  <!-- 提示 -->
+  <div class="hint-text">
+  </div>
+</div>

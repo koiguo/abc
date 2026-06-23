@@ -1,0 +1,124 @@
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 60vh;
+  
+  ion-spinner {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+.empty-cart {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 60vh;
+  
+  ion-icon {
+    font-size: 80px;
+    color: var(--ion-color-medium);
+  }
+  
+  p {
+    margin: 16px 0;
+    color: var(--ion-color-medium);
+    font-size: 16px;
+  }
+}
+
+// 商品列表样式
+ion-item {
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --inner-padding-end: 0;
+}
+
+ion-thumbnail {
+  width: 60px;
+  height: 60px;
+  
+  img {
+    border-radius: 8px;
+    object-fit: cover;
+  }
+}
+
+ion-label {
+  h2 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  
+  .price {
+    color: var(--ion-color-primary);
+    font-weight: bold;
+    font-size: 16px;
+  }
+}
+
+// 数量控制
+.quantity-control {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--ion-color-light);
+  border-radius: 20px;
+  padding: 2px 8px;
+  
+  ion-button {
+    margin: 0;
+    height: 28px;
+    
+    ion-icon {
+      font-size: 16px;
+    }
+  }
+  
+  span {
+    min-width: 24px;
+    text-align: center;
+    font-weight: 500;
+  }
+}
+
+// 底部结算栏
+.footer {
+  margin-top: 20px;
+  padding: 16px;
+  background: var(--ion-background-color);
+  border-top: 1px solid var(--ion-color-light);
+  
+  .total {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 12px;
+    text-align: right;
+    
+    &::before {
+      content: '总计: ';
+      font-weight: normal;
+      font-size: 14px;
+    }
+  }
+  
+  ion-button {
+    --border-radius: 8px;
+    margin: 0;
+  }
+}
+
+// 深色模式适配
+@media (prefers-color-scheme: dark) {
+  .quantity-control {
+    background: #2a2a2a;
+  }
+  
+  .footer {
+    border-top-color: #2a2a2a;
+  }
+}

@@ -1,0 +1,429 @@
+ion-title {
+  text-align: center;
+}
+
+ion-buttons {
+  z-index: 10;
+}
+
+// 头部头像样式
+.chat-header-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  
+  .header-avatar {
+    width: 32px;
+    height: 32px;
+    
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+  }
+  
+  span {
+    font-size: 16px;
+    font-weight: 500;
+  }
+}
+
+// ========== 核心布局 ==========
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--ion-background-color);
+}
+
+ion-header {
+  flex-shrink: 0;
+}
+
+.chat-content {
+  flex: 1;
+  --padding-bottom: 0 !important;
+  --padding-top: 0 !important;
+  --padding-start: 0 !important;
+  --padding-end: 0 !important;
+}
+
+.messages-container {
+  height: 100%;
+  padding: 12px;
+  padding-bottom: 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+// 底部输入框
+.chat-footer {
+  flex-shrink: 0;
+  background: var(--ion-background-color);
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+  
+  ion-toolbar {
+    --padding-bottom: 0 !important;
+    --padding-top: 0 !important;
+    --padding-start: 0 !important;
+    --padding-end: 0 !important;
+    --min-height: auto !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  
+  .input-item {
+    --padding-start: 12px;
+    --padding-end: 8px;
+    --inner-padding-end: 0;
+    --inner-padding-bottom: 8px;
+    --inner-padding-top: 8px;
+    --min-height: auto;
+    margin-bottom: 0;
+  }
+  
+  .message-input {
+    --padding-start: 12px;
+    --padding-end: 12px;
+    --padding-top: 8px;
+    --padding-bottom: 8px;
+    --background: var(--ion-color-light, #f5f5f5);
+    --border-radius: 20px;
+    font-size: 14px;
+  }
+}
+
+// ============================================
+// 所有按钮统一样式 - 无底色，线条颜色自适应
+// ============================================
+
+// 语音切换按钮、表情包按钮、更多按钮、发送按钮
+.voice-toggle-btn,
+.emoji-btn,
+.more-btn,
+.send-btn {
+  --background: transparent !important;
+  --background-activated: transparent !important;
+  --background-focused: transparent !important;
+  --background-hover: transparent !important;
+  --box-shadow: none !important;
+  --ripple-color: transparent !important;
+  margin: 0;
+  margin-left: 4px;
+  height: 36px;
+  width: 36px;
+  
+  ion-icon {
+    font-size: 20px;
+  }
+}
+
+// 浅色模式图标颜色
+@media (prefers-color-scheme: light) {
+  .voice-toggle-btn ion-icon,
+  .emoji-btn ion-icon,
+  .more-btn ion-icon,
+  .send-btn ion-icon {
+    color: #000000 !important;
+  }
+}
+
+// 深色模式图标颜色
+@media (prefers-color-scheme: dark) {
+  .voice-toggle-btn ion-icon,
+  .emoji-btn ion-icon,
+  .more-btn ion-icon,
+  .send-btn ion-icon {
+    color: #ffffff !important;
+  }
+}
+
+// 发送按钮禁用状态
+.send-btn[disabled] {
+  opacity: 0.4;
+}
+
+// 语音录制按钮
+.voice-record-btn {
+  width: 100%;
+  margin: 0;
+  --border-radius: 24px;
+  --background: #f5f5f5;
+  --color: #000000;
+  height: 40px;
+  transition: all 0.1s ease;
+  
+  &.recording {
+    --background: #ff4d4f;
+    --color: white;
+    transform: scale(0.98);
+  }
+  
+  &.cancelling {
+    --background: #ffaa00;
+    --color: white;
+  }
+}
+
+// 深色模式语音录制按钮
+@media (prefers-color-scheme: dark) {
+  .voice-record-btn {
+    --background: #2a2a2a;
+    --color: #e0e0e0;
+    
+    &.recording {
+      --background: #ff4d4f;
+      --color: white;
+    }
+    
+    &.cancelling {
+      --background: #ffaa00;
+      --color: white;
+    }
+  }
+}
+
+.voice-input-container {
+  flex: 1;
+  margin-left: 8px;
+  margin-right: 8px;
+}
+
+// 表情包面板
+.emoji-picker {
+  background: var(--ion-background-color);
+  border-top: 0.5px solid var(--ion-color-light-shade, #e0e0e0);
+  padding: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.emoji-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.emoji-item {
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+  transition: background 0.2s;
+  
+  &:hover {
+    background: var(--ion-color-light, #f5f5f5);
+  }
+}
+
+// 移除所有默认间距和边框
+ion-footer::before {
+  display: none !important;
+  height: 0 !important;
+}
+
+ion-toolbar {
+  --border-width: 0 !important;
+}
+
+// 消息样式
+.message-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+  
+  &.my-message {
+    justify-content: flex-end;
+    
+    .message-bubble-wrapper {
+      align-items: flex-end;
+    }
+    
+    .message-bubble {
+      background: var(--ion-color-primary);
+      color: white;
+      border-radius: 18px 18px 4px 18px;
+    }
+    
+    .message-time {
+      text-align: right;
+    }
+  }
+  
+  &.other-message {
+    justify-content: flex-start;
+    
+    .message-bubble-wrapper {
+      align-items: flex-start;
+    }
+    
+    .message-bubble {
+      background: #f1f1f1;
+      color: #333;
+      border-radius: 18px 18px 18px 4px;
+    }
+    
+    .message-time {
+      text-align: left;
+    }
+  }
+}
+
+.message-avatar {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+}
+
+.message-bubble-wrapper {
+  display: flex;
+  flex-direction: column;
+  max-width: 75%;
+}
+
+.message-bubble {
+  padding: 8px 12px;
+  font-size: 14px;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+.message-time {
+  font-size: 10px;
+  color: #999;
+  margin-top: 2px;
+  padding: 0 4px;
+}
+
+// 图片消息样式
+.message-image {
+  img {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+}
+
+// 语音消息样式 - 带播放动画
+.message-audio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(100, 100, 100, 0.1);
+  padding: 8px 12px;
+  border-radius: 18px;
+  cursor: pointer;
+  transition: background 0.2s;
+  
+  &:active {
+    background: rgba(100, 100, 100, 0.2);
+  }
+  
+  ion-icon {
+    font-size: 24px;
+    color: var(--ion-color-primary);
+  }
+  
+  .audio-wave {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 24px;
+    
+    .wave-bar {
+      width: 3px;
+      height: 12px;
+      background: #999;
+      border-radius: 2px;
+      transition: height 0.1s ease;
+      
+      &.active {
+        animation: wave 0.5s ease infinite alternate;
+      }
+      
+      &:nth-child(1) { animation-delay: 0s; }
+      &:nth-child(2) { animation-delay: 0.1s; }
+      &:nth-child(3) { animation-delay: 0.2s; }
+      &:nth-child(4) { animation-delay: 0.3s; }
+      &:nth-child(5) { animation-delay: 0.4s; }
+    }
+  }
+  
+  .audio-duration {
+    font-size: 12px;
+    color: #666;
+  }
+}
+
+
+// 波形动画
+@keyframes wave {
+  0% { height: 8px; }
+  100% { height: 20px; }
+}
+
+// 安全区域适配
+@supports not (padding-bottom: env(safe-area-inset-bottom)) {
+  .chat-footer {
+    padding-bottom: 0;
+  }
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .chat-footer {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+// 深色模式全局适配
+@media (prefers-color-scheme: dark) {
+  .other-message .message-bubble {
+    background: #2a2a2a;
+    color: #e0e0e0;
+  }
+  
+  .chat-footer {
+    .message-input {
+      --background: #2a2a2a;
+      --color: #ffffff;
+      --placeholder-color: #888888;
+    }
+  }
+  
+  .emoji-picker {
+    background: #1e1e1e;
+    border-top-color: #2a2a2a;
+  }
+  
+  .message-audio {
+    background: rgba(200, 200, 200, 0.1);
+    
+    .audio-wave .wave-bar {
+      background: #aaa;
+      
+      &.active {
+        background: var(--ion-color-primary);
+      }
+    }
+    
+    .audio-duration {
+      color: #aaa;
+    }
+  }
+}

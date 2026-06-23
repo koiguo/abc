@@ -1,24 +1,22 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { provideIonicAngular } from '@ionic/angular/standalone';
+import { provideHttpClient } from '@angular/common/http';
 import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
-import { provideHttpClient } from '@angular/common/http';
 import { addIcons } from 'ionicons';
-
 import { 
-  mailOutline, chevronForwardOutline,trendingUpOutline,cartOutline,arrowBackOutline,searchOutline,settingsOutline,
-  locationOutline,heartOutline,cameraOutline,trashOutline,addOutline,peopleOutline,ticketOutline,bagCheckOutline,ellipsisHorizontalOutline,
-  qrCodeOutline,personCircleOutline,lockClosedOutline,callOutline,arrowDownOutline
+  mailOutline, chevronForwardOutline, trendingUpOutline, cartOutline, arrowBackOutline, searchOutline, settingsOutline,
+  locationOutline, heartOutline, cameraOutline, trashOutline, addOutline, peopleOutline, ticketOutline, bagCheckOutline,
+  ellipsisHorizontalOutline, qrCodeOutline, personCircleOutline, lockClosedOutline, callOutline, arrowDownOutline,
+  closeOutline, ellipsisVerticalOutline, flagOutline, addCircleOutline, cropOutline, gridOutline, pawOutline,
+  closeCircleOutline, waterOutline, fastFoodOutline, medkitOutline, cashOutline, carOutline, cubeOutline,
+  personAddOutline, checkmarkOutline, chatbubbleOutline, chatbubblesOutline, happyOutline, micOutline, arrowUpOutline,
+  playCircleOutline, keypadOutline, imagesOutline, pauseCircleOutline,refreshOutline,sendOutline
 } from 'ionicons/icons';
 
-
-// ========== 新增：导入 PWA Elements ==========
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
 
-
-// ========== 新增：在应用启动前注册 Web 组件 ==========
-// 这行代码必须在 bootstrapApplication 之前执行
 defineCustomElements(window);
 
 addIcons({
@@ -30,25 +28,55 @@ addIcons({
   'search-outline': searchOutline,
   'settings-outline': settingsOutline,
   'location-outline': locationOutline,
-  'heart-outline':heartOutline,
-  'camera-outline':cameraOutline,
-  'trash-outline':trashOutline,
-  'add-outline':addOutline,
-  'people-outline':peopleOutline,
-  'ticket-outline':ticketOutline,
-  'bag-check-outline':bagCheckOutline,
-  'ellipsis-horizontal-outline':ellipsisHorizontalOutline,
-  'qr-code-outline':qrCodeOutline,
-  'person-circle-outline':personCircleOutline,
-  'lock-closed-outline':lockClosedOutline,
-  'call-outline':callOutline,
-  'arrow-down-outline':arrowDownOutline,
-})
+  'heart-outline': heartOutline,
+  'camera-outline': cameraOutline,
+  'trash-outline': trashOutline,
+  'add-outline': addOutline,
+  'people-outline': peopleOutline,
+  'ticket-outline': ticketOutline,
+  'bag-check-outline': bagCheckOutline,
+  'ellipsis-horizontal-outline': ellipsisHorizontalOutline,
+  'qr-code-outline': qrCodeOutline,
+  'person-circle-outline': personCircleOutline,
+  'lock-closed-outline': lockClosedOutline,
+  'call-outline': callOutline,
+  'arrow-down-outline': arrowDownOutline,
+  'close-outline': closeOutline,
+  'ellipsis-vertical-outline': ellipsisVerticalOutline,
+  'flag-outline': flagOutline,
+  'add-circle-outline': addCircleOutline,
+  'crop-outline': cropOutline,
+  'grid-outline': gridOutline,
+  'paw-outline': pawOutline,
+  'close-circle-outline': closeCircleOutline,
+  'water-outline': waterOutline,
+  'fast-food-outline': fastFoodOutline,
+  'medkit-outline': medkitOutline,
+  'cash-outline': cashOutline,
+  'car-outline': carOutline,
+  'cube-outline': cubeOutline,
+  'person-add-outline': personAddOutline,
+  'checkmark-outline': checkmarkOutline,
+  'chatbubble-outline': chatbubbleOutline,
+  'chatbubbles-outline': chatbubblesOutline,
+  'happy-outline': happyOutline,
+  'mic-outline': micOutline,
+  'keyboard-outline': keypadOutline,  
+  'arrow-up-outline': arrowUpOutline,
+  'play-circle-outline': playCircleOutline,
+  'pause-circle-outline': pauseCircleOutline,
+  'images-outline': imagesOutline,
+  'refresh-outline':refreshOutline,
+  'send-outline':sendOutline
+});
 
 bootstrapApplication(AppComponent, {
   providers: [
-    provideIonicAngular(),
     provideRouter(routes),
+    provideIonicAngular({
+      mode: 'md',
+      innerHTMLTemplatesEnabled: true
+    }),
     provideHttpClient()
   ]
-});
+}).catch(err => console.error(err));

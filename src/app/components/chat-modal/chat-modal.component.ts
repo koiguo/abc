@@ -7,6 +7,7 @@ import { AuthService } from '../../services/auth.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { VoiceRecorder } from 'capacitor-voice-recorder';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { ImagePreviewModalComponent } from '../../image-preview-modal/image-preview-modal.component';
 
 @Component({
   selector: 'app-chat-modal',
@@ -596,135 +597,172 @@ export class ChatModalComponent implements OnInit, OnDestroy {
   }
 
   // 压缩图片方法
-  private compressImage(base64: string, maxWidth: number, quality: number): Promise<Blob> {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.src = 'data:image/jpeg;base64,' + base64;
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
-        
-        if (width > maxWidth) {
-          height = (height * maxWidth) / width;
-          width = maxWidth;
+  private compressImage(base64String: string, maxWidth: number, quality: number): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    // 确保base64字符串有正确的data:image前缀
+    let imgSrc = base64String;
+    if (!base64String.startsWith('data:image')) {
+      imgSrc = 'data:image/jpeg;base64,' + base64String;
+    }
+    
+    const img = new Image();
+    img.src = imgSrc;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+      
+      if (width > maxWidth) {
+        height = (height * maxWidth) / width;
+        width = maxWidth;
+      }
+      
+      canvas.width = width;
+      canvas.height = height;
+      
+      const ctx = canvas.getContext('2d');
+      ctx?.drawImage(img, 0, 0, width, height);
+      
+      canvas.toBlob((blob) => {
+        if (blob) {
+          resolve(blob);
+        } else {
+          reject(new Error('压缩失败'));
         }
-        
-        canvas.width = width;
-        canvas.height = height;
-        
-        const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, 0, 0, width, height);
-        
-        canvas.toBlob((blob) => {
-          if (blob) {
-            resolve(blob);
-          } else {
-            reject(new Error('压缩失败'));
-          }
-        }, 'image/jpeg', quality);
-      };
-      img.onerror = reject;
-    });
-  }
+      }, 'image/jpeg', quality);
+    };
+    img.onerror = (err) => reject(err);
+  });
+}
 
   async takePhoto() {
-    try {
-      const photo = await Camera.getPhoto({
-        quality: 60,
-        allowEditing: false,
-        resultType: CameraResultType.Base64,
-        source: CameraSource.Camera,
-        width: 800,
-        height: 800
-      });
+  try {
+    // 先请求权限（某些平台需要）
+    const permission = await Camera.requestPermissions();
+    if (permission.camera !== 'granted') {
+      this.showToast('需要相机权限才能拍照', 'danger');
+      return;
+    }
       
-      if (photo.base64String) {
-        const loading = await this.loadingController.create({
-          message: '处理图片中...'
-        });
-        await loading.present();
-        
-        const compressedBlob = await this.compressImage(photo.base64String, 800, 0.7);
+      const photo = await Camera.getPhoto({
+      quality: 70,           // 提高一点质量
+      allowEditing: false,
+      resultType: CameraResultType.Base64,  // 保持Base64格式
+      source: CameraSource.Camera,
+      width: 1024,           // 稍微加大宽度
+      height: 1024
+    });
+    
+    if (photo.base64String) {
+      const loading = await this.loadingController.create({
+        message: '处理图片中...'
+      });
+      await loading.present();
+      
+      try {
+        // 直接传入base64String，不要加前缀（压缩函数会处理）
+        const compressedBlob = await this.compressImage(photo.base64String, 1024, 0.7);
         await loading.dismiss();
-        
         await this.uploadAndSendImageFromBlob(compressedBlob);
+      } catch (compressError) {
+        await loading.dismiss();
+        console.error('压缩失败:', compressError);
+        this.showToast('图片处理失败', 'danger');
       }
-    } catch (error) {
-      console.error('拍照失败:', error);
-      this.showToast('拍照失败，请重试', 'danger');
+    } else {
+      this.showToast('拍照失败，未获取到图片', 'danger');
+    }
+  } catch (error: any) {
+    console.error('拍照失败:', error);
+    // 用户取消拍照不算错误
+    if (error?.message !== 'User cancelled photos app') {
+      this.showToast('拍照失败: ' + (error?.message || '请重试'), 'danger');
     }
   }
+}
 
   async selectImage() {
-    try {
-      const photo = await Camera.getPhoto({
-        quality: 60,
-        allowEditing: false,
-        resultType: CameraResultType.Base64,
-        source: CameraSource.Photos,
-        width: 800,
-        height: 800
-      });
+  try {
+    const photo = await Camera.getPhoto({
+      quality: 60,
+      allowEditing: false,
+      resultType: CameraResultType.Base64,
+      source: CameraSource.Camera,
+      width: 800,
+      height: 800
+    });
       
       if (photo.base64String) {
-        const loading = await this.loadingController.create({
-          message: '处理图片中...'
-        });
-        await loading.present();
-        
-        const compressedBlob = await this.compressImage(photo.base64String, 800, 0.7);
+      const loading = await this.loadingController.create({
+        message: '处理图片中...'
+      });
+      await loading.present();
+      
+      try {
+        const compressedBlob = await this.compressImage(photo.base64String, 1024, 0.7);
         await loading.dismiss();
-        
         await this.uploadAndSendImageFromBlob(compressedBlob);
+      } catch (compressError) {
+        await loading.dismiss();
+        this.showToast('图片处理失败', 'danger');
       }
-    } catch (error) {
-      console.error('选择图片失败:', error);
+    }
+  } catch (error: any) {
+    console.error('选择图片失败:', error);
+    if (error?.message !== 'User cancelled photos app') {
       this.showToast('选择图片失败', 'danger');
     }
   }
+}
 
   async uploadAndSendImageFromBlob(blob: Blob) {
-    const formData = new FormData();
-    formData.append('image', blob, `image_${Date.now()}.jpg`);
-    
-    const tempId = Date.now();
-    const previewUrl = URL.createObjectURL(blob);
-    const tempMessage = {
-      id: tempId,
-      fromUserId: this.currentUser.id,
-      toUserId: this.targetUserId,
-      content: previewUrl,
-      type: 'image',
-      timestamp: new Date(),
-      isMine: true,
-      isTemp: true
-    };
-    this.messages.push(tempMessage);
-    this.scrollToBottom();
-    
-    this.http.post(`${this.apiUrl}/upload/image`, formData).subscribe({
-      next: (res: any) => {
-        if (res.success && res.data?.url) {
-          this.sendImageMessageToServer(res.data.url, tempId);
-        } else {
-          this.showToast('上传失败', 'danger');
-          const index = this.messages.findIndex(m => m.id === tempId);
-          if (index !== -1) {
-            this.messages[index].isFailed = true;
-          }
-        }
-      },
-      error: (err) => {
-        console.error('上传失败', err);
-        this.showToast('上传失败，请重试', 'danger');
+  const formData = new FormData();
+  // 注意：这里的文件扩展名可能因为压缩而变成jpg
+  formData.append('image', blob, `image_${Date.now()}.jpg`);
+  
+  const tempId = Date.now();
+  // 创建本地预览URL
+  const previewUrl = URL.createObjectURL(blob);
+  const tempMessage = {
+    id: tempId,
+    fromUserId: this.currentUser.id,
+    toUserId: this.targetUserId,
+    content: previewUrl,
+    type: 'image',
+    timestamp: new Date(),
+    isMine: true,
+    isTemp: true
+  };
+  this.messages.push(tempMessage);
+  this.scrollToBottom();
+  
+  // 强制触发变更检测
+  this.cdr.detectChanges();
+  
+  this.http.post(`${this.apiUrl}/upload/image`, formData).subscribe({
+    next: (res: any) => {
+      if (res.success && res.data?.url) {
+        this.sendImageMessageToServer(res.data.url, tempId);
+      } else {
+        this.showToast('上传失败', 'danger');
         const index = this.messages.findIndex(m => m.id === tempId);
         if (index !== -1) {
           this.messages[index].isFailed = true;
+          this.cdr.detectChanges();
         }
       }
-    });
-  }
+    },
+    error: (err) => {
+      console.error('上传失败', err);
+      this.showToast('上传失败，请重试', 'danger');
+      const index = this.messages.findIndex(m => m.id === tempId);
+      if (index !== -1) {
+        this.messages[index].isFailed = true;
+        this.cdr.detectChanges();
+      }
+    }
+  });
+}
 
   async uploadAndSendImage(imageDataUrl: string) {
     const blob = this.dataURLToBlob(imageDataUrl);
@@ -814,9 +852,21 @@ export class ChatModalComponent implements OnInit, OnDestroy {
     return new Blob([u8arr], { type: mime });
   }
 
-  previewImage(imageUrl: string) {
-    window.open(imageUrl, '_blank');
-  }
+async previewImage(imageUrl: string) {
+  const modal = await this.modalController.create({
+    component: ImagePreviewModalComponent,
+    componentProps: {
+      imageUrl: imageUrl
+    },
+    cssClass: 'image-preview-modal',
+    backdropDismiss: false,
+    keyboardClose: true,
+    mode: 'ios',
+    animated: true
+  });
+  
+  await modal.present();
+}
 
   sendMessage() {
     if (this.isVoiceMode) return;

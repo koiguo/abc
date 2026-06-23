@@ -14,6 +14,7 @@
 @import "@ionic/angular/css/flex-utils.css";
 @import '@ionic/angular/css/palettes/dark.system.css';
 
+
 // 标题居中
 .center-title {
   text-align: center;
@@ -138,6 +139,21 @@ ion-modal.chat-modal-fullscreen {
   --padding-bottom: 0 !important;
   --padding-start: 0 !important;
   --padding-end: 0 !important;
+}
+.image-preview-modal {
+  --border-radius: 0px;
+  --background: transparent;
+  
+  .modal-wrapper {
+    --border-radius: 0px;
+    --box-shadow: none;
+    --background: transparent;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
 }
 
 // ============================================

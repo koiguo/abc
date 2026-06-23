@@ -19,7 +19,7 @@ export class MessagesPage implements OnInit, OnDestroy {
   filteredMessages: any[] = [];
   pendingRequestCount: number = 0;
   totalUnreadCount: number = 0;
-  isLoading: boolean = true;
+  isLoading: boolean = false;  // 改为 false，首次加载不显示 loading
   isRefreshing: boolean = false;
   isError: boolean = false;
   isLoggedIn: boolean = true;
@@ -44,8 +44,9 @@ export class MessagesPage implements OnInit, OnDestroy {
     }
     this.isLoggedIn = true;
 
-    this.loadContactsFromApi(false);
-    this.loadPendingRequestCount(false);
+    // 首次加载不显示 loading，直接静默加载
+    this.loadContactsFromApi(true);  // 改为 true，静默加载
+    this.loadPendingRequestCount(true);
     this.startSmartPolling();
   }
 
@@ -118,21 +119,24 @@ export class MessagesPage implements OnInit, OnDestroy {
     }).subscribe({
       next: (res: any) => {
         if (res.success) {
-          this.pendingRequestCount = res.count || 0;
-          localStorage.setItem('pendingRequestCount', this.pendingRequestCount.toString());
-          this.updateTotalBadge();
+          const newCount = res.count || 0;
+          if (this.pendingRequestCount !== newCount) {
+            this.pendingRequestCount = newCount;
+            localStorage.setItem('pendingRequestCount', this.pendingRequestCount.toString());
+            this.updateTotalBadge();
+          }
         }
       },
       error: (err) => {
-        console.error('加载申请数量失败', err);
         if (!silent) {
+          console.error('加载申请数量失败', err);
           this.pendingRequestCount = 0;
         }
       }
     });
   }
 
-  // ✅ 格式化最后一条消息的显示内容
+  // 格式化最后一条消息的显示内容
   private formatLastMessage(contact: any): string {
     const lastMessage = contact.last_message || '';
     const lastMessageType = contact.last_message_type || 'text';
@@ -153,6 +157,7 @@ export class MessagesPage implements OnInit, OnDestroy {
     
     this.isUpdating = true;
     
+    // 只有非静默模式才显示加载状态（但首次加载已改为静默，所以不会显示）
     if (!silent) {
       this.isLoading = true;
     }
@@ -169,7 +174,6 @@ export class MessagesPage implements OnInit, OnDestroy {
         }
         
         if (res.success && res.data) {
-          // ✅ 处理每条消息的显示格式
           const newMessages = res.data.map((contact: any) => ({
             id: contact.id,
             user_id: contact.user_id,
@@ -178,12 +182,11 @@ export class MessagesPage implements OnInit, OnDestroy {
             unread: contact.unread || 0,
             avatar: contact.avatar || 'https://ionicframework.com/docs/img/demos/avatar.svg',
             last_message_time: contact.last_message_time,
-            // 保存原始消息用于其他用途
             raw_last_message: contact.last_message,
             last_message_type: contact.last_message_type
           }));
           
-          this.mergeMessages(newMessages);
+          this.mergeMessagesSilently(newMessages);
           this.saveUnreadCount();
           this.updateTotalBadge();
         } else {
@@ -204,21 +207,19 @@ export class MessagesPage implements OnInit, OnDestroy {
     });
   }
 
-  // 增量合并消息
-  private mergeMessages(newMessages: any[]) {
+  // 静默合并消息（无控制台日志，无额外动画）
+  private mergeMessagesSilently(newMessages: any[]) {
     let hasChanges = false;
     const existingMap = new Map(this.messages.map(m => [m.user_id, m]));
     
     for (const newMsg of newMessages) {
       const existing = existingMap.get(newMsg.user_id);
       if (existing) {
-        if (newMsg.unread > existing.unread) {
+        if (newMsg.unread !== existing.unread) {
           hasChanges = true;
           existing.unread = newMsg.unread;
-          console.log(`[未读更新] ${existing.name}: ${existing.unread} -> ${newMsg.unread}`);
         }
         
-        // 更新其他字段
         existing.lastMessage = newMsg.lastMessage;
         existing.last_message_time = newMsg.last_message_time;
         existing.name = newMsg.name;
@@ -272,9 +273,7 @@ export class MessagesPage implements OnInit, OnDestroy {
     }, {
       headers: this.getHeaders()
     }).subscribe({
-      next: () => {
-        console.log('标记已读成功');
-      },
+      next: () => {},
       error: (err) => {
         console.error('标记已读失败', err);
       }
@@ -313,7 +312,8 @@ export class MessagesPage implements OnInit, OnDestroy {
       if (tabBar) {
         tabBar.style.display = '';
       }
-      this.refreshAll();
+      this.loadContactsFromApi(true);
+      this.loadPendingRequestCount(true);
     });
     
     await modal.present();

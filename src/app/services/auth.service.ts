@@ -135,6 +135,7 @@ login(account: string, password: string): Observable<any> {
     
     this.currentUserSubject.next(null);
     this.isLoggedInSubject.next(false);
+  
   }
 
   // 从服务器刷新用户信息

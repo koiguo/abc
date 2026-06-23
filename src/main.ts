@@ -12,7 +12,7 @@ import {
   closeOutline, ellipsisVerticalOutline, flagOutline, addCircleOutline, cropOutline, gridOutline, pawOutline,
   closeCircleOutline, waterOutline, fastFoodOutline, medkitOutline, cashOutline, carOutline, cubeOutline,
   personAddOutline, checkmarkOutline, chatbubbleOutline, chatbubblesOutline, happyOutline, micOutline, arrowUpOutline,
-  playCircleOutline, keypadOutline, imagesOutline, pauseCircleOutline
+  playCircleOutline, keypadOutline, imagesOutline, pauseCircleOutline,refreshOutline,sendOutline
 } from 'ionicons/icons';
 
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
@@ -61,11 +61,13 @@ addIcons({
   'chatbubbles-outline': chatbubblesOutline,
   'happy-outline': happyOutline,
   'mic-outline': micOutline,
-  'keyboard-outline': keypadOutline,  // 使用 keypadOutline
+  'keyboard-outline': keypadOutline,  
   'arrow-up-outline': arrowUpOutline,
   'play-circle-outline': playCircleOutline,
   'pause-circle-outline': pauseCircleOutline,
-  'images-outline': imagesOutline
+  'images-outline': imagesOutline,
+  'refresh-outline':refreshOutline,
+  'send-outline':sendOutline
 });
 
 bootstrapApplication(AppComponent, {
